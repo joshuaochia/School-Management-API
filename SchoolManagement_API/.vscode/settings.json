@@ -1,7 +1,0 @@
-{ "[python]": {
-    "editor.wordBasedSuggestions": false,
-    "editor.rulers": [
-        79
-        ]
-},
-}
