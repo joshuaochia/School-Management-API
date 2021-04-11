@@ -23,16 +23,14 @@ class EmployeesSerializer(serializers.ModelSerializer):
     first_name = serializers.CharField(max_length=99, write_only=True)
     last_name = serializers.CharField(max_length=99, write_only=True)
     middle_name = serializers.CharField(max_length=99, write_only=True)
-  
 
     class Meta:
         model = models.Employees
         fields = '__all__'
         read_only_fields = ('id', 'school', 'slug', 'created_by', 'user')
 
- 
     def create(self, validated_data):
-        
+
         email = validated_data.pop('email')
         f_name = validated_data.pop('first_name')
         l_name = validated_data.pop('last_name')
@@ -40,14 +38,14 @@ class EmployeesSerializer(serializers.ModelSerializer):
         password = validated_data.pop('password')
 
         user = get_user_model().objects.create_user(
-            email = email,
-            first_name = f_name,
-            last_name = l_name,
-            password = password,
-            middle_name = m_name
+            email=email,
+            first_name=f_name,
+            last_name=l_name,
+            password=password,
+            middle_name=m_name
         )
 
-        validated_data['user'] = user   
+        validated_data['user'] = user
         instance = super().create(validated_data)
 
         return instance
@@ -87,8 +85,8 @@ class SchoolSerializer(serializers.ModelSerializer):
     class Meta:
         model = models.School
         fields = (
-            'id', 'name', 'vision', 'mission','country',
+            'id', 'name', 'vision', 'mission', 'country',
             'street', 'city', 'zip_code', 'date_funded',
-            'policies', 'departments', 'courses' , 'employees',
+            'policies', 'departments', 'courses', 'employees',
         )
         read_only_fields = ('id', )

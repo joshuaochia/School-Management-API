@@ -109,7 +109,7 @@ class Students(models.Model):
         )
     bday = models.DateField(null=True, verbose_name='Birth Day')
     country = CountryField(null=True)
-    city = models.CharField(max_length=255 ,null=True)
+    city = models.CharField(max_length=255, null=True)
     zip_code = models.PositiveSmallIntegerField(
         verbose_name='Zip Code',
         null=True
@@ -134,10 +134,10 @@ class Students(models.Model):
 
         self.slug = slugify(self.user.first_name + '' + self.user.last_name)
         return super().save(*args, **kwargs)
-    
+
     @property
     def get_year(self):
-        date = timezone.datetime.strptime('%Y', self.school_yr) 
+        date = timezone.datetime.strptime('%Y', self.school_yr)
         return date
 
     def __str__(self):
@@ -166,12 +166,5 @@ class SubjectAverage(models.Model):
         on_delete=models.CASCADE,
         related_name='average'
     )
-    avg = models.IntegerField() 
+    avg = models.IntegerField()
     status = models.CharField(max_length=255, choices=grade_status)
-
-
-
-
-
-
-

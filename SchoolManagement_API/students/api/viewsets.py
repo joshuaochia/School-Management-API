@@ -10,8 +10,6 @@ from school.models import School
 from rest_framework import filters
 from django.shortcuts import get_object_or_404
 
-import students
-
 
 class StudentsViewSets(viewsets.ModelViewSet):
     """ Viewset for creating new students with action of adding, deleting, and
@@ -133,14 +131,15 @@ class SectionViewSet(viewsets.ModelViewSet):
 
     queryset = models.Section.objects.all()
     serializer_class = serializers.SectionSerializer
-    permission_classes = (perm.IsAdminUserOrReadOnly,)
+    permission_classes = (perm.IsAdminUserOrReadOnly, )
     pagination_class = pagination.LimitOffsetPagination
 
 
 class GradesViewSet(viewsets.ViewSet):
 
-    """ Viewset only for students to view thei  r grades and schedule """ 
-
+    """
+    Viewset only for students to view thei  r grades and schedule
+    """
 
     def list(self, request):
         user = self.request.user
@@ -152,7 +151,9 @@ class GradesViewSet(viewsets.ViewSet):
 
 class StudentProfile(generics.RetrieveUpdateDestroyAPIView):
 
-    """ Viewsset for viewing or updating the curret logged in student profile """
+    """
+    Viewsset for viewing or updating the curret logged in student profile
+    """
 
     serializer_class = serializers.StudentOwnerSerializer
 

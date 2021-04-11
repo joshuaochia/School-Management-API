@@ -3,10 +3,7 @@ from django_countries.fields import CountryField
 from django.utils.translation import ugettext_lazy as _
 from .conf import majors, courses, sex, status
 from django.conf import settings
-from django.db.models.signals import post_save, pre_save
-from django.dispatch import receiver
 from django.utils.text import slugify
-
 
 
 class School(models.Model):
@@ -36,17 +33,16 @@ class Policies(models.Model):
         )
     policy = models.CharField(max_length=556)
 
-
     class Meta:
         verbose_name = _('Policie')
         verbose_name_plural = _("Policies")
-    
+
     def __str__(self):
         return f'{self.school} Policy'
 
 
 class Department(models.Model):
-    
+
     school = models.ForeignKey(
         'School',
         on_delete=models.CASCADE,
@@ -72,7 +68,7 @@ class Courses(models.Model):
     class Meta:
         verbose_name = _('Course')
         verbose_name_plural = _("Courses")
-    
+
     def __str__(self):
 
         return self.course + ' major in ' + self.major
@@ -101,10 +97,10 @@ class Employees(models.Model):
         on_delete=models.CASCADE,
         related_name='workers'
     )
-    position = models.CharField(max_length=255,null=True)
+    position = models.CharField(max_length=255, null=True)
     bday = models.DateField(null=True, verbose_name='Birth Day')
     country = CountryField(null=True)
-    city = models.CharField(max_length=255,null=True)
+    city = models.CharField(max_length=255, null=True)
     zip_code = models.PositiveSmallIntegerField(
         verbose_name='Zip Code',
         null=True
@@ -128,5 +124,5 @@ class Employees(models.Model):
         return super().save(*args, **kwargs)
 
     def __str__(self):
-        
+
         return f'{self.user} of {self.department} ({self.school})'

@@ -4,4 +4,6 @@ exclude =
     __pycache__,
     manage.py,
     settings.py,
-    conf.py
+    conf.py,
+    wsgi.py,
+    asgi.py,

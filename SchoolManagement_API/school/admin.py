@@ -3,7 +3,7 @@ from .models import (
     School, Policies, Department, Courses,
     Employees
     )
-# Register your models here.
+
 
 admin.site.register(School)
 admin.site.register(Policies)

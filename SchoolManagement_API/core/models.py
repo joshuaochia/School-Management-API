@@ -3,6 +3,7 @@ from django.contrib.auth.models import (
     AbstractBaseUser, BaseUserManager, PermissionsMixin
     )
 
+
 class UserManager(BaseUserManager):
 
     def create_user(
@@ -12,7 +13,7 @@ class UserManager(BaseUserManager):
 
         if not email:
             raise ValueError('User must have email address')
-        
+
         user = self.model(
             email=self.normalize_email(email),
             first_name=first_name,
@@ -20,15 +21,14 @@ class UserManager(BaseUserManager):
             middle_name=middle_name
         )
 
-        user.set_password(password) 
+        user.set_password(password)
         user.save(using=self._db)
         return user
 
     def create_superuser(
         self, email, first_name,
-        last_name, middle_name,password
+        last_name, middle_name, password
     ):
-
 
         user = self.create_user(
             email, first_name, last_name,
@@ -56,7 +56,7 @@ class User(AbstractBaseUser, PermissionsMixin):
     is_admin = models.BooleanField(default=False)
     is_superuser = models.BooleanField(default=False)
 
-    USERNAME_FIELD = 'email' # <---- User use to log in
+    USERNAME_FIELD = 'email'
     REQUIRED_FIELDS = ['first_name', 'last_name', 'middle_name']
 
     objects = UserManager()
@@ -75,6 +75,3 @@ class User(AbstractBaseUser, PermissionsMixin):
     def has_module_perms(self, app_label):
         # User permission to view the ap modules
         return True
-
-
-

@@ -9,4 +9,3 @@ urlpatterns = [
     path('employees/', views.employees, name='employees_page'),
 
 ]
-

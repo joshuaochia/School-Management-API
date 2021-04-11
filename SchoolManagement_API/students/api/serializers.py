@@ -1,4 +1,3 @@
-from django.db.models import fields
 from rest_framework import serializers
 from .. import models
 from django.contrib.auth import get_user_model
@@ -149,7 +148,6 @@ class GradesSerializer(serializers.ModelSerializer):
 
 class StudentOwnerSerializer(serializers.ModelSerializer):
 
-
     class Meta:
         model = models.Students
         fields = (
@@ -159,6 +157,6 @@ class StudentOwnerSerializer(serializers.ModelSerializer):
             'sem', 'slug'
             )
         read_only_fields = (
-            'id',  'slug','sem', 'school_yr',
+            'id', 'slug', 'sem', 'school_yr',
             'school', 'course', 'user'
             )
