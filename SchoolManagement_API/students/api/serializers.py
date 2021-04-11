@@ -128,15 +128,14 @@ class StudentSubjectSerializer(serializers.ModelSerializer):
     class Meta:
         model = models.StudentSubject
         fields = '__all__'
-        read_only_fields = ('id', 'student')
+        read_only_fields = ('id', 'student', 'abs', 'grade')
 
-        def create(self, validated_data):
+    def create(self, validated_data):
 
-            subject_id = validated_data.pop('subject_id')
+        subject_id = validated_data.pop('subject_id')
+        validated_data['subject'] = subject_id
 
-            validated_data['subject'] = subject_id
-
-            return models.StudentSubject.objects.create(**validated_data)
+        return models.StudentSubject.objects.create(**validated_data)
 
 
 class GradesSerializer(serializers.ModelSerializer):
