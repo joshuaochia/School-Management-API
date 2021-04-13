@@ -1,5 +1,6 @@
 from rest_framework import (
-    viewsets, status, pagination, generics
+    viewsets, status, pagination, generics,
+    permissions
     )
 from .. import models
 from . import serializers, permissions as perm
@@ -61,19 +62,11 @@ class StudentsViewSets(viewsets.ModelViewSet):
         return Response(serializer.data)
 
 
-class TeacherViewSets(viewsets.ModelViewSet):
-
-    """
-    Add a student grade and edit
-    """
-
-
 class SubjectViewSet(viewsets.ModelViewSet):
 
     """
     Add, edit, delete, etc.. a new subject for students to populate
-
-    Permission: Only admin can add users
+    Permission: Only admin can add new subjects
     """
 
     queryset = models.Subjects.objects.all()
@@ -119,6 +112,11 @@ class SubjectViewSet(viewsets.ModelViewSet):
 
 class ScheduleViewSet(viewsets.ModelViewSet):
 
+    """
+    Creating, editing, deleting new schedule for students
+    Permission: Only admin can add new subjects
+    """
+
     queryset = models.Schedule.objects.all()
     serializer_class = serializers.ScheduleSerializer
     permission_classes = (perm.IsAdminUserOrReadOnly, )
@@ -129,6 +127,11 @@ class ScheduleViewSet(viewsets.ModelViewSet):
 
 class SectionViewSet(viewsets.ModelViewSet):
 
+    """
+    Viewset for adding, deleting, and editing new section for the students
+    Permission: Only admin can add new subjects
+    """
+
     queryset = models.Section.objects.all()
     serializer_class = serializers.SectionSerializer
     permission_classes = (perm.IsAdminUserOrReadOnly, )
@@ -138,8 +141,9 @@ class SectionViewSet(viewsets.ModelViewSet):
 class GradesViewSet(viewsets.ViewSet):
 
     """
-    Viewset only for students to view thei  r grades and schedule
+    Viewset only for students to view their grades and schedule
     """
+    permission_classes = (permissions.IsAuthenticated,)
 
     def list(self, request):
         user = self.request.user

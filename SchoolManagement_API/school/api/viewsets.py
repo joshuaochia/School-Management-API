@@ -1,5 +1,6 @@
+from students.models import Subjects, StudentSubject
 from rest_framework import (
-    viewsets, status, permissions, authentication, generics
+    viewsets, status, permissions, authentication, generics, filters
     )
 from .. import models
 from . import serializers, permissions as perm
@@ -130,6 +131,8 @@ class EmployeeViewSet(viewsets.ModelViewSet):
     serializer_class = serializers.EmployeesSerializer
     permission_classes = (perm.EmployeeOrReadOnly, )
     authentication_classes = (authentication.TokenAuthentication, )
+    filter_backends = [filters.SearchFilter]
+    search_fields = ['=position', ]
 
     def perform_create(self, serializer):
 
@@ -146,3 +149,52 @@ class OwnProfileViewSet(generics.RetrieveUpdateDestroyAPIView):
 
     def get_object(self):
         return get_object_or_404(models.Employees, user=self.request.user)
+
+
+class TeacherSubjectViewSet(viewsets.ModelViewSet):
+
+    permission_classes = [permissions.IsAuthenticated, ]
+    serializer_class = serializers.TeacherSubjectSerializer
+
+    def get_queryset(self):
+
+        user = self.request.user
+        return Subjects.objects.filter(teacher__user=user)
+
+    def get_serializer_class(self):
+
+        if self.action == 'students':
+            return serializers.TeacherStudentSerializer
+
+        return self.serializer_class
+
+    @action(detail=True, methods=['GET', 'PUT'], url_path='students')
+    def students(self, request, pk=None):
+
+        instance = self.get_object()
+        user = self.request.user
+        query = StudentSubject.objects.filter(
+            subject__teacher__user=user,
+            subject=instance
+            )
+
+        id = self.request.query_params.get('id')
+
+        if id:
+            q = get_object_or_404(StudentSubject, pk=id, subject=instance)
+            serializer = self.get_serializer(q)
+            if request.method == 'PUT':
+                serializer = self.get_serializer(
+                    q,
+                    data=request.data,
+                    partial=True,
+                    )
+                serializer.is_valid(raise_exception=True)
+                serializer.save()
+                return Response(serializer.data)
+
+            return Response(serializer.data, status=status.HTTP_404_NOT_FOUND)
+
+        serializer = self.get_serializer(query, many=True)
+
+        return Response(serializer.data)

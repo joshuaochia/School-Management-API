@@ -74,6 +74,7 @@ class Subjects(models.Model):
     section = models.ForeignKey(
         Section,
         on_delete=models.CASCADE,
+        related_name='subject'
     )
 
     class Meta:
@@ -81,7 +82,7 @@ class Subjects(models.Model):
         verbose_name_plural = _('Subjects')
 
     def __str__(self):
-        return f"{self.name}"
+        return f"{self.name} ({self.section.code}) {self.schedule}"
 
 
 class Students(models.Model):
@@ -154,9 +155,14 @@ class StudentSubject(models.Model):
     subject = models.ForeignKey(
         Subjects,
         on_delete=models.CASCADE,
+        related_name='student_subject'
     )
     abs = models.IntegerField(default=0)
     grade = models.IntegerField(default=0)
+
+    def __str__(self):
+
+        return f'{self.student}'
 
 
 class SubjectAverage(models.Model):

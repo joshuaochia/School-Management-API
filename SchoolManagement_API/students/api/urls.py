@@ -2,15 +2,16 @@ from rest_framework.routers import DefaultRouter
 from django.urls import path, include
 from . import viewsets
 
+
+# Routers for admins to edit certain things for students
 admin_router = DefaultRouter()
 admin_router.register('list', viewsets.StudentsViewSets)
 admin_router.register('subject', viewsets.SubjectViewSet)
 admin_router.register('schedule', viewsets.ScheduleViewSet)
-admin_router.register('section', viewsets.SectionViewSet)
 
+# Routers for students
 user_router = DefaultRouter()
-
-user_router.register('subjects', viewsets.GradesViewSet, basename='users2')
+user_router.register('subjects', viewsets.GradesViewSet, basename='grades')
 
 
 urlpatterns = [
