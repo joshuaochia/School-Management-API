@@ -1,10 +1,10 @@
 from rest_framework import (
-    viewsets, status, pagination, generics,
+    viewsets, status, generics,
     permissions
     )
 from .. import models
 from . import serializers, permissions as perm
-from .pagination import PageLimit
+from .pagination import PageLimit, StudentLimit
 from rest_framework.decorators import action
 from rest_framework.response import Response
 from school.models import School
@@ -13,6 +13,7 @@ from django.shortcuts import get_object_or_404
 
 
 class StudentsViewSets(viewsets.ModelViewSet):
+
     """ Viewset for creating new students with action of adding, deleting, and
         editing (Subject, section, and schedule).
 
@@ -22,6 +23,7 @@ class StudentsViewSets(viewsets.ModelViewSet):
     queryset = models.Students.objects.all()
     serializer_class = serializers.StudentsSerializer
     permission_classes = (perm.IsAdminUserOrReadOnly, )
+    pagination_class = StudentLimit
 
     def get_serializer_class(self):
 
@@ -72,6 +74,7 @@ class SubjectViewSet(viewsets.ModelViewSet):
     queryset = models.Subjects.objects.all()
     serializer_class = serializers.SubjectSerializer
     permission_classes = (perm.IsAdminUserOrReadOnly,)
+    pagination_class = PageLimit
 
     def get_serializer_class(self):
 
@@ -135,7 +138,7 @@ class SectionViewSet(viewsets.ModelViewSet):
     queryset = models.Section.objects.all()
     serializer_class = serializers.SectionSerializer
     permission_classes = (perm.IsAdminUserOrReadOnly, )
-    pagination_class = pagination.LimitOffsetPagination
+    pagination_class = PageLimit
 
 
 class GradesViewSet(viewsets.ViewSet):
@@ -144,6 +147,7 @@ class GradesViewSet(viewsets.ViewSet):
     Viewset only for students to view their grades and schedule
     """
     permission_classes = (permissions.IsAuthenticated,)
+    pagination_class = PageLimit
 
     def list(self, request):
         user = self.request.user
