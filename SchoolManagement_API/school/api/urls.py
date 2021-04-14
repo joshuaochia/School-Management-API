@@ -5,11 +5,6 @@ from . import viewsets
 router = DefaultRouter()
 router.register('detail', viewsets.SchoolViewSet, basename='school')
 router.register('all-employees', viewsets.EmployeeViewSet)
-router.register(
-    'me/subject',
-    viewsets.TeacherSubjectViewSet,
-    basename='subject'
-    )
 
 
 urlpatterns = [

@@ -157,6 +157,64 @@ class GradesViewSet(viewsets.ViewSet):
         return Response(serializer.data)
 
 
+class TeacherSubjectViewSet(viewsets.ModelViewSet):
+
+    """
+    Viewset for viewing all the subjects handled by a teacher and there's
+    a feature of adding grades and absencees for each students
+    """
+
+    permission_classes = [permissions.IsAuthenticated, ]
+    serializer_class = serializers.TeacherSubjectSerializer
+
+    def get_queryset(self):
+
+        user = self.request.user
+        return models.Subjects.objects.filter(teacher__user=user)
+
+    def get_serializer_class(self):
+
+        if self.action == 'students':
+            return serializers.TeacherStudentSerializer
+
+        return self.serializer_class
+
+    @action(detail=True, methods=['GET', 'PUT'], url_path='students')
+    def students(self, request, pk=None):
+
+        instance = self.get_object()
+        user = self.request.user
+        query = models.StudentSubject.objects.filter(
+            subject__teacher__user=user,
+            subject=instance
+            )
+
+        id = self.request.query_params.get('id')
+
+        if id:
+            q = get_object_or_404(
+                models.StudentSubject,
+                pk=id,
+                subject=instance
+                )
+            serializer = self.get_serializer(q)
+            if request.method == 'PUT':
+                serializer = self.get_serializer(
+                    q,
+                    data=request.data,
+                    partial=True,
+                    )
+                serializer.is_valid(raise_exception=True)
+                serializer.save()
+                return Response(serializer.data)
+
+            return Response(serializer.data, status=status.HTTP_404_NOT_FOUND)
+
+        serializer = self.get_serializer(query, many=True)
+
+        return Response(serializer.data)
+
+
 class StudentProfile(generics.RetrieveUpdateDestroyAPIView):
 
     """
@@ -170,6 +228,10 @@ class StudentProfile(generics.RetrieveUpdateDestroyAPIView):
 
 
 class ClassMateViewSet(viewsets.ModelViewSet):
+
+    """
+    Viewset for viewing all the classmate on specific subject
+    """
 
     serializer_class = serializers.ClassMateSerializer
 

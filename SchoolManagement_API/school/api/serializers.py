@@ -1,7 +1,6 @@
 from rest_framework import serializers
 from .. import models
 from django.contrib.auth import get_user_model
-from students.models import Subjects, StudentSubject
 
 
 class OwnProfileSerializer(serializers.ModelSerializer):
@@ -112,61 +111,3 @@ class SchoolSerializer(serializers.ModelSerializer):
             'policies', 'departments', 'courses', 'employees',
         )
         read_only_fields = ('id', )
-
-
-class TeacherSubjectSerializer(serializers.ModelSerializer):
-
-    """
-    Serializer for viewing all of subjects handled by
-    logged in teacher/professor
-    """
-
-    course = serializers.StringRelatedField(read_only=True)
-    schedule = serializers.StringRelatedField(read_only=True)
-    teacher = serializers.StringRelatedField(read_only=True)
-    section = serializers.StringRelatedField(read_only=True)
-
-    class Meta:
-        model = Subjects
-        fields = '__all__'
-
-
-class TeacherStudentSerializer(serializers.ModelSerializer):
-
-    """
-    Serializer for editing grades and absencees of one student
-    """
-
-    student = serializers.StringRelatedField(read_only=True)
-    subject = serializers.StringRelatedField(read_only=True)
-
-    class Meta:
-        model = StudentSubject
-        fields = '__all__'
-        read_only_fields = ('id', 'avg')
-
-    def avg(self, *args):
-
-        return float(sum([i for i in args]))/2
-
-    def update(self, instance, validated_data):
-
-        p_1 = int(validated_data.get('period_1'))
-        p_2 = int(validated_data.get('period_2'))
-        p_3 = int(validated_data.get('period_3'))
-
-        validated_data['avg'] = self.avg(p_1, p_2, p_3)
-
-        status = validated_data.get('status')
-        avg = validated_data.get('avg')
-
-        if status == 'INC':
-            validated_data['status'] = 'INC'
-
-        elif avg >= 75:
-            validated_data['status'] = 'Passed'
-
-        else:
-            validated_data['status'] = 'Failed'
-
-        return super().update(instance, validated_data)

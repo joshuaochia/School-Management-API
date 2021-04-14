@@ -171,3 +171,57 @@ class StudentSubject(models.Model):
     def __str__(self):
 
         return f'{self.student}'
+
+
+class Project(models.Model):
+
+    subject = models.ForeignKey(
+        Subjects,
+        on_delete=models.CASCADE,
+        related_name='projects'
+    )
+    title = models.CharField(max_length=255)
+    dead_line = models.DateTimeField(verbose_name='Dead Line')
+    description = models.TextField(max_length=5006)
+    assign = models.ManyToManyField(
+        Students,
+        related_name='my_project',
+        verbose_name='Members'
+    )
+    file = models.FileField(upload_to='project/')
+
+
+class Assignment(models.Model):
+
+    subject = models.ForeignKey(
+        Subjects,
+        on_delete=models.CASCADE,
+        related_name='assignment'
+    )
+    title = models.CharField(max_length=255)
+    dead_line = models.DateTimeField(verbose_name='Dead Line')
+    description = models.TextField(max_length=5006)
+    assign = models.ManyToManyField(
+        Students,
+        related_name='my_assignment',
+        verbose_name='Members'
+    )
+    files = models.ManyToManyField(
+        Students,
+        through='FileAssignment',
+    )
+
+
+class FileAssignment(models.Model):
+
+    student = models.ForeignKey(
+        Students,
+        on_delete=models.CASCADE,
+        related_name='assignment_file'
+    )
+    assignment = models.ForeignKey(
+        Assignment,
+        on_delete=models.CASCADE,
+        related_name='assignment_files'
+    )
+    file = models.FileField(upload_to='assignment/')

@@ -14,6 +14,12 @@ user_router = DefaultRouter()
 user_router.register('subjects', viewsets.GradesViewSet, basename='grades')
 user_router.register('class', viewsets.ClassMateViewSet, basename='classmates')
 
+# Urls for teacher logged in
+user_router.register(
+    'teacher/subject',
+    viewsets.TeacherSubjectViewSet,
+    basename='subject'
+    )
 
 urlpatterns = [
     path('admin/', include(admin_router.urls)),
