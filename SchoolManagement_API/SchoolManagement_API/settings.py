@@ -51,7 +51,8 @@ INSTALLED_APPS = [
     # Internal apps
     'core',
     'school',
-    'students'
+    'students',
+    'finance'
 ]
 
 

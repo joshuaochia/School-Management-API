@@ -128,14 +128,19 @@ class StudentSubjectSerializer(serializers.ModelSerializer):
     class Meta:
         model = models.StudentSubject
         fields = '__all__'
-        read_only_fields = ('id', 'student', 'abs', 'grade')
+        read_only_fields = (
+            'id', 'student', 'abs_1', 'abs_2', 'abs_3',
+            'period_1', 'period_2', 'period_3'
+            )
 
     def create(self, validated_data):
 
         subject_id = validated_data.pop('subject_id')
         validated_data['subject'] = subject_id
 
-        return models.StudentSubject.objects.create(**validated_data)
+        q = models.StudentSubject.objects.create(**validated_data)
+
+        return q
 
 
 class GradesSerializer(serializers.ModelSerializer):
@@ -147,10 +152,13 @@ class GradesSerializer(serializers.ModelSerializer):
 
 class StudentOwnerSerializer(serializers.ModelSerializer):
 
+    user = serializers.StringRelatedField(read_only=True)
+    course = serializers.StringRelatedField(read_only=True)
+
     class Meta:
         model = models.Students
         fields = (
-            'id', 'user', 'pic', 'course',
+            'id', 'user', 'course', 'pic',
             'school', 'bday', 'country', 'city',
             'zip_code', 'sex', 'civil_status', 'school_yr',
             'sem', 'slug'
@@ -159,3 +167,12 @@ class StudentOwnerSerializer(serializers.ModelSerializer):
             'id', 'slug', 'sem', 'school_yr',
             'school', 'course', 'user'
             )
+
+
+class ClassMateSerializer(serializers.ModelSerializer):
+
+    subject = serializers.StringRelatedField(read_only=True)
+
+    class Meta:
+        model = models.StudentSubject
+        fields = ('id', 'subject', )

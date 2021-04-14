@@ -6,6 +6,7 @@ from django_countries.fields import CountryField
 from django.utils.translation import ugettext_lazy as _
 from django.utils.text import slugify
 from django.utils import timezone
+
 # Create your models here.
 
 days = [
@@ -151,26 +152,22 @@ class StudentSubject(models.Model):
     student = models.ForeignKey(
         Students,
         on_delete=models.CASCADE,
+        related_name='student_sub'
     )
     subject = models.ForeignKey(
         Subjects,
         on_delete=models.CASCADE,
         related_name='student_subject'
     )
-    abs = models.IntegerField(default=0)
-    grade = models.IntegerField(default=0)
+    period_1 = models.IntegerField(default=0)
+    abs_1 = models.IntegerField(default=0)
+    period_2 = models.IntegerField(default=0)
+    abs_2 = models.IntegerField(default=0)
+    period_3 = models.IntegerField(default=0)
+    abs_3 = models.IntegerField(default=0)
+    avg = models.IntegerField(default=0)
+    status = models.CharField(max_length=255, choices=grade_status)
 
     def __str__(self):
 
         return f'{self.student}'
-
-
-class SubjectAverage(models.Model):
-
-    stud_sub = models.ForeignKey(
-        StudentSubject,
-        on_delete=models.CASCADE,
-        related_name='average'
-    )
-    avg = models.IntegerField()
-    status = models.CharField(max_length=255, choices=grade_status)

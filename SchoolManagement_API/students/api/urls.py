@@ -12,6 +12,7 @@ admin_router.register('schedule', viewsets.ScheduleViewSet)
 # Routers for students
 user_router = DefaultRouter()
 user_router.register('subjects', viewsets.GradesViewSet, basename='grades')
+user_router.register('class', viewsets.ClassMateViewSet, basename='classmates')
 
 
 urlpatterns = [

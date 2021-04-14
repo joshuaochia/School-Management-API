@@ -167,3 +167,30 @@ class StudentProfile(generics.RetrieveUpdateDestroyAPIView):
 
     def get_object(self):
         return get_object_or_404(models.Students, user=self.request.user)
+
+
+class ClassMateViewSet(viewsets.ModelViewSet):
+
+    serializer_class = serializers.ClassMateSerializer
+
+    def get_queryset(self):
+
+        user = self.request.user
+        query = models.StudentSubject.objects.filter(student__user=user)
+        return query
+
+    def get_serializer_class(self):
+
+        if self.action == 'classmates':
+            return serializers.StudentOwnerSerializer
+
+        return self.serializer_class
+
+    @action(methods=['GET', ], detail=True, url_path='classmates')
+    def classmates(self, request, pk=None):
+
+        obj = self.get_object()
+        query = models.Students.objects.filter(student_sub=obj)
+        serializer = self.get_serializer(query, many=True)
+
+        return Response(serializer.data)
