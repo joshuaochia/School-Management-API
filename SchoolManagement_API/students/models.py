@@ -184,11 +184,19 @@ class Project(models.Model):
     dead_line = models.DateTimeField(verbose_name='Dead Line')
     description = models.TextField(max_length=5006)
     assign = models.ManyToManyField(
-        Students,
+        StudentSubject,
         related_name='my_project',
         verbose_name='Members'
     )
-    file = models.FileField(upload_to='project/')
+    sample = models.FileField(
+        upload_to='project/',
+        null=True
+        )
+    files = models.ManyToManyField(
+        StudentSubject,
+        through='FileProject',
+        blank=True
+    )
 
 
 class Assignment(models.Model):
@@ -202,26 +210,51 @@ class Assignment(models.Model):
     dead_line = models.DateTimeField(verbose_name='Dead Line')
     description = models.TextField(max_length=5006)
     assign = models.ManyToManyField(
-        Students,
+        StudentSubject,
         related_name='my_assignment',
-        verbose_name='Members'
+        verbose_name='Members',
+        blank=True
     )
+    sample = models.FileField(
+        upload_to='assignment/',
+        null=True
+        )
     files = models.ManyToManyField(
-        Students,
+        StudentSubject,
         through='FileAssignment',
+        blank=True
     )
 
 
 class FileAssignment(models.Model):
 
     student = models.ForeignKey(
-        Students,
+        StudentSubject,
         on_delete=models.CASCADE,
-        related_name='assignment_file'
+        related_name='assignment_file',
+        null=True
     )
     assignment = models.ForeignKey(
         Assignment,
         on_delete=models.CASCADE,
-        related_name='assignment_files'
+        related_name='assignment_files',
+        null=True
     )
     file = models.FileField(upload_to='assignment/')
+
+
+class FileProject(models.Model):
+
+    student = models.ForeignKey(
+        StudentSubject,
+        on_delete=models.CASCADE,
+        related_name='project_file',
+        null=True
+    )
+    project = models.ForeignKey(
+        Project,
+        on_delete=models.CASCADE,
+        related_name='project_files',
+        null=True
+    )
+    file = models.FileField(upload_to='project/')

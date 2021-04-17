@@ -3,6 +3,8 @@ from .. import models
 from django.contrib.auth import get_user_model
 
 
+# Serializer for school admin that facilicate students start here
+
 class StudentsSerializer(serializers.ModelSerializer):
 
     """
@@ -64,6 +66,7 @@ class StudentsSerializer(serializers.ModelSerializer):
 
 
 class SectionSerializer(serializers.ModelSerializer):
+
     """
     Save new student.models.section or edit existing one
     """
@@ -75,6 +78,7 @@ class SectionSerializer(serializers.ModelSerializer):
 
 
 class ScheduleSerializer(serializers.ModelSerializer):
+
     """
     Save new student.models.Schedule or edit existing one
     """
@@ -86,8 +90,10 @@ class ScheduleSerializer(serializers.ModelSerializer):
 
 
 class SubjectSerializer(serializers.ModelSerializer):
+
     """
-    Create new subject for a specific user
+    Create new subject for the school.
+    Also: Nested serializer for StudentSubjectSerializer for reading
     """
 
     schedule = serializers.StringRelatedField(read_only=True)
@@ -119,6 +125,10 @@ class SubjectSerializer(serializers.ModelSerializer):
 
 class StudentSubjectSerializer(serializers.ModelSerializer):
 
+    """
+    Serializer for adding new subject on enrolled students
+    """
+
     subject = SubjectSerializer(read_only=True)
     subject_id = serializers.PrimaryKeyRelatedField(
         queryset=models.Subjects.objects.all(),
@@ -142,15 +152,126 @@ class StudentSubjectSerializer(serializers.ModelSerializer):
 
         return q
 
+# Serializer for school admin that facilicate students ends here
 
-class GradesSerializer(serializers.ModelSerializer):
+# Serializers for student user starts here
+
+
+class FileAssignmentSerializer(serializers.ModelSerializer):
+
+    """
+    Nested serializer for StudentAssignmentSerializer.
+    Purpose: Accept file
+    """
 
     class Meta:
-        model = models.StudentSubject
+        model = models.FileAssignment
         fields = '__all__'
+        read_only_fields = ('id', 'assignment', 'student')
+
+    def create(self, validated_data):
+
+        return super().create(validated_data)
+
+
+class StudentAssignmentSerializer(serializers.ModelSerializer):
+
+    """
+    Serializer for students viewing and passing assignments on a
+    particular subject
+    """
+
+    assignment_files = FileAssignmentSerializer(write_only=True)
+
+    class Meta:
+        model = models.Assignment
+        fields = (
+            'id', 'assignment_files', 'subject', 'title',
+            'dead_line', 'description', 'sample', 'assign',
+            )
+        read_only_fields = (
+            'id', 'subject', 'title',
+            'dead_line', 'description', 'assign', 'sample'
+            )
+
+    def update(self, instance, validated_data):
+
+        user = self.context['request'].user
+        subject = instance.subject
+        student_sub = models.StudentSubject.objects.get(
+            student__user=user,
+            subject=subject
+            )
+        assignment_files = validated_data.pop('assignment_files')
+        models.FileAssignment.objects.create(
+            **assignment_files,
+            assignment=instance,
+            student=student_sub
+        )
+
+        return super().update(instance, validated_data)
+
+
+class FileProjectSerializer(serializers.ModelSerializer):
+
+    """
+    Nested serializer for StudentProjectSerializer.
+    Purpose: Accept file
+    """
+
+    class Meta:
+        model = models.FileProject
+        fields = '__all__'
+        read_only_fields = ('id', 'project', 'student')
+
+    def create(self, validated_data):
+
+        return super().create(validated_data)
+
+
+class StudentProjectSerializer(serializers.ModelSerializer):
+
+    """
+    Serializer for students viewing and passing projects on a
+    particular subject
+    """
+
+    project_file = FileProjectSerializer(write_only=True)
+
+    class Meta:
+        model = models.Project
+        fields = (
+            'id', 'subject', 'title', 'dead_line', 'description',
+            'sample', 'assign', 'project_file'
+        )
+        read_only_fields = (
+            'id', 'subject', 'title', 'dead_line', 'description',
+            'sample', 'assign',
+        )
+
+    def update(self, instance, validated_data):
+
+        user = self.context['request'].user
+        subject = instance.subject
+        student_sub = models.StudentSubject.objects.get(
+            student__user=user,
+            subject=subject
+            )
+        assignment_files = validated_data.pop('project_file')
+        models.FileProject.objects.create(
+            **assignment_files,
+            project=instance,
+            student=student_sub
+        )
+
+        return super().update(instance, validated_data)
 
 
 class StudentOwnerSerializer(serializers.ModelSerializer):
+
+    """
+    Serializer for viewing the current profile of logged in students.
+    """
 
     user = serializers.StringRelatedField(read_only=True)
     course = serializers.StringRelatedField(read_only=True)
@@ -172,11 +293,16 @@ class StudentOwnerSerializer(serializers.ModelSerializer):
 class ClassMateSerializer(serializers.ModelSerializer):
 
     subject = serializers.StringRelatedField(read_only=True)
+    student = serializers.StringRelatedField(read_only=True)
 
     class Meta:
         model = models.StudentSubject
-        fields = ('id', 'subject', )
+        fields = ('id', 'subject', 'student')
 
+
+# Serializers for student user ends here
+
+# Serializers for logged in teacher starts here
 
 class TeacherSubjectSerializer(serializers.ModelSerializer):
 
@@ -189,6 +315,7 @@ class TeacherSubjectSerializer(serializers.ModelSerializer):
     schedule = serializers.StringRelatedField(read_only=True)
     teacher = serializers.StringRelatedField(read_only=True)
     section = serializers.StringRelatedField(read_only=True)
+    student_subject = ClassMateSerializer(many=True, read_only=True)
 
     class Meta:
         model = models.Subjects
@@ -234,3 +361,35 @@ class TeacherStudentSerializer(serializers.ModelSerializer):
             validated_data['status'] = 'Failed'
 
         return super().update(instance, validated_data)
+
+
+class TeacherAssignmentSerializer(serializers.ModelSerializer):
+
+    """
+    Serializer for teachers. Adding new assignment on a specific
+    subject
+    """
+
+    class Meta:
+        model = models.Assignment
+        fields = (
+            'subject', 'title', 'dead_line', 'description', 'assign'
+        )
+        read_only_fields = ('id', 'subject')
+
+
+class TeacherProjectSerializer(serializers.ModelSerializer):
+
+    """
+    Serializer for teachers. Adding new assignment on a specific
+    subject
+    """
+
+    class Meta:
+        model = models.Project
+        fields = (
+            'subject', 'title', 'dead_line', 'description', 'assign'
+        )
+        read_only_fields = ('id', 'subject')
+
+# Serializers for logged in teacher ends here
