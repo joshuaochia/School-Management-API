@@ -13,20 +13,26 @@ class Command(BaseCommand):
     def add_arguments(self, parser):
         parser.add_argument('first', type=int, help='A number less than 100')
 
-
     def handle(self, *args, **options):
-        
+
         school = get_object_or_404(School, pk=1)
+        success = 0
 
-        for i in range(options['first']):
+        for _ in range(options['first']):
             policy = Policies.objects.get_or_create(
-                policy = fake.text(),
-                school = school
-            )[0]
-            policy.save()
-            self.stdout.write(f'Creating data... {int(i)}')
+                policy=fake.text(),
+                school=school
+            )
 
-            q =+ int(i)
+            if policy[1]:
+                policy[0].save()
+                self.stdout.write(self.style.SUCCESS('Creating data....'))
+                success += 1
+            else:
+                self.stdout.write(
+                    self.style.WARNING('Duplicated data found..')
+                    )
 
-        self.stdout.write(self.style.SUCCESS(f'Success, created {q+1} fake data'))
-        
+        self.stdout.write(
+            self.style.SUCCESS(f'Success, created {success} fake data')
+            )
