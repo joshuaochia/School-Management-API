@@ -15,3 +15,27 @@ This project is open source - the sole purpose of this project is to showcase my
 - Edit or add policies for the school (Admin Access only)
 - Add new or edit existing departments of the school (Admin Access only)
 -  Add new or edit existing departments of the school (Admin Access only)
+
+
+
+
+### Populate the DB first with fake data
+
+Command:
+   - python manage.py [avail custom command] [int(argument)] 
+
+E.G. python manage.py policies 5
+
+Avail custom command:
+   1. policies 
+   2. courses
+   3. departments
+   4. employees
+   5. schedule
+   6. section
+   7. student
+   8. subject
+
+Int Argument: How many fake data you want to create
+
+
