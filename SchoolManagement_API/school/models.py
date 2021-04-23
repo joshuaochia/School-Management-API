@@ -12,7 +12,7 @@ class School(models.Model):
     vision = models.CharField(max_length=255, null=True)
     mission = models.CharField(max_length=255, null=True)
     street = models.CharField(max_length=255, null=True)
-    country = CountryField()
+    country = CountryField(null=True)
     city = models.CharField(max_length=255)
     zip_code = models.PositiveSmallIntegerField(
         verbose_name='Zip Code',
@@ -99,7 +99,7 @@ class Employees(models.Model):
     )
     position = models.CharField(max_length=255, null=True)
     bday = models.DateField(null=True, verbose_name='Birth Day')
-    country = CountryField(null=True)
+    country = CountryField(default='PH')
     city = models.CharField(max_length=255, null=True)
     zip_code = models.PositiveSmallIntegerField(
         verbose_name='Zip Code',
@@ -110,7 +110,8 @@ class Employees(models.Model):
         max_length=55,
         choices=status,
         verbose_name='Civil Status',
-        null=True
+        null=True,
+        default='Single'
         )
 
     slug = models.SlugField(null=True)

@@ -2,9 +2,16 @@ from rest_framework.routers import DefaultRouter
 from django.urls import path, include
 from . import viewsets
 
+
+app_name = 'api_school'
+
 router = DefaultRouter()
-router.register('detail', viewsets.SchoolViewSet, basename='school')
-router.register('all-employees', viewsets.EmployeeViewSet)
+router.register('institution', viewsets.SchoolViewSet, basename='institution')
+router.register(
+    'all-employees',
+    viewsets.EmployeeViewSet,
+    basename='employees'
+    )
 
 
 urlpatterns = [

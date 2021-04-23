@@ -127,13 +127,13 @@ class SchoolViewSet(viewsets.ModelViewSet):
 
 class EmployeeViewSet(viewsets.ModelViewSet):
 
-    queryset = models.Employees.objects.all()
+    queryset = models.Employees.objects.all().order_by('-id')
     serializer_class = serializers.EmployeesSerializer
     permission_classes = (perm.EmployeeOrReadOnly, )
     authentication_classes = (authentication.TokenAuthentication, )
-    filter_backends = [filters.SearchFilter]
+    filter_backends = [filters.SearchFilter, ]
     search_fields = ['=position', ]
-    pagination_class = (pag.EmployeesPageLimit,)
+    pagination_class = (pag.EmployeesPageLimit)
 
     def perform_create(self, serializer):
 

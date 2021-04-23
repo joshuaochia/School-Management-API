@@ -1,6 +1,7 @@
 from rest_framework import serializers
 from .. import models
 from django.contrib.auth import get_user_model
+from django_countries.serializers import CountryFieldMixin
 
 
 class OwnProfileSerializer(serializers.ModelSerializer):
@@ -33,7 +34,7 @@ class EmployeesSerializer(serializers.ModelSerializer):
     class Meta:
         model = models.Employees
         fields = '__all__'
-        read_only_fields = ('id', 'school', 'slug', 'created_by', 'user')
+        read_only_fields = ('id', 'school', 'slug', 'created_by', 'user', )
 
     def create(self, validated_data):
 
@@ -65,7 +66,7 @@ class CoursesSerializer(serializers.ModelSerializer):
     class Meta:
         model = models.Courses
         fields = '__all__'
-        read_only_fields = ('id',)
+        read_only_fields = ('id', 'school')
 
 
 class DepartmentSerializer(serializers.ModelSerializer):
@@ -92,7 +93,7 @@ class PoliciesSerializer(serializers.ModelSerializer):
         read_only_fields = ('id', 'school')
 
 
-class SchoolSerializer(serializers.ModelSerializer):
+class SchoolSerializer(CountryFieldMixin, serializers.ModelSerializer):
 
     """
     Serialzier for the school
@@ -101,7 +102,6 @@ class SchoolSerializer(serializers.ModelSerializer):
     policies = PoliciesSerializer(many=True, read_only=True)
     departments = DepartmentSerializer(many=True, read_only=True)
     courses = CoursesSerializer(many=True, read_only=True)
-    employees = EmployeesSerializer(many=True, read_only=True)
 
     class Meta:
         model = models.School

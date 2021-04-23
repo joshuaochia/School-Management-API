@@ -3,7 +3,7 @@ from .base import *
 # Override the base settings here
 
 DEBUG = True
-ALLOWED_HOSTS = ['127.0.0.1']
+ALLOWED_HOSTS = []
 
 
 INSTALLED_APPS += [
@@ -37,4 +37,3 @@ DATABASES = {
         'NAME': BASE_DIR / 'db.sqlite3',
     }
 }
-

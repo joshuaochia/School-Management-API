@@ -35,7 +35,7 @@ class Command(BaseCommand):
 
         success = 0
         fail = 0
-        for _ in range(options['first']):
+        for _ in range(options['student']):
 
             school = get_object_or_404(School, pk=1)
             user = get_user_model().objects.create_user(
@@ -50,7 +50,6 @@ class Command(BaseCommand):
                 school=school,
                 course=random.choice(self.course),
                 bday=fake.date(),
-                country='Philippines',
                 city=fake.city(),
                 zip_code=fake.random_int(min=3, max=5),
                 sex=random.choice(['Male', 'Femail']),
@@ -64,7 +63,7 @@ class Command(BaseCommand):
                 self.stdout.write(self.style.SUCCESS('Creating data..'))
                 success += 1
 
-                for _ in range(options['two']):
+                for _ in range(options['subject']):
                     StudentSubject.objects.get_or_create(
                         student=student[0],
                         subject=random.choice(self.sub)

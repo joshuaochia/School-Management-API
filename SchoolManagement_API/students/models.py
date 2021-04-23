@@ -110,7 +110,7 @@ class Students(models.Model):
         related_name='students'
         )
     bday = models.DateField(null=True, verbose_name='Birth Day')
-    country = CountryField(null=True)
+    country = CountryField(default='PH')
     city = models.CharField(max_length=255, null=True)
     zip_code = models.PositiveSmallIntegerField(
         verbose_name='Zip Code',

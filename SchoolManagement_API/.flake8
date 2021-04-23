@@ -3,7 +3,7 @@ exclude =
     migrations,
     __pycache__,
     manage.py,
-    settings.py,
+    settings,
     conf.py,
     wsgi.py,
     asgi.py,
