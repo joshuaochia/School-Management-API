@@ -17,12 +17,12 @@ POST, PUT, PATCH:
 - Add new or edit existing departments of the school (Admin Access only)
 -  Add new or edit existing departments of the school (Admin Access only)
 
+![](readme-images/post_employee.png)
+
 GET:
 - School Detail, policies, departments, courses, and employees
 
 ![](readme-images/school_datas.png)
-
-
 
 
 ### Populate the DB first with fake data
