@@ -5,6 +5,7 @@ from django.urls import reverse
 from rest_framework import status
 from .. import models
 from school.api import serializers
+import random
 
 
 EMP_URL = reverse('api_school:employees-list')
@@ -156,3 +157,71 @@ class EmployeePrivateAPI(TestCase):
         self.assertEqual(res2.status_code, status.HTTP_403_FORBIDDEN)
         self.assertFalse(object)
         self.assertNotIn(res2.data, serializer.data)
+
+
+class EmployeeSuperUserAPI(TestCase):
+
+    def setUp(self):
+
+        self.school = school_sample()
+        self.user = get_user_model().objects.create_user(
+            email='user@gmail.com',
+            first_name='Normal',
+            last_name='User',
+            middle_name='placeholder',
+            password='TestPass!23'
+        )
+        self.created_by = get_user_model().objects.create_superuser(
+            email='created.by@gmail.com',
+            first_name='created',
+            last_name='User',
+            middle_name='By',
+            password='TestPass!23'
+        )
+        self.department = department_sample(self.school)
+        self.client = APIClient()
+        self.client.force_authenticate(self.created_by)
+
+    def test_api_post(self):
+
+        stats = [
+            ('Married', 'Married'),
+            ('Single', 'Single')
+            ]
+
+        sex = [
+            ('Male', 'Male'),
+            ('Female', 'Female')
+            ]
+
+        s = random.choice(sex)[0]
+        stat = random.choice(stats)[0]
+
+        data = {
+            "password": "Signup!23",
+            "email": "gagokabobo@gmail.com",
+            "first_name": "Taingina",
+            "last_name": "shits",
+            "middle_name": "fssa",
+            "position": "Teacher",
+            "department": self.department.id,
+            "city": "Cagayan De Oro",
+            "zip_code": 9000,
+            'sex': s,
+            'civil_status': stat,
+        }
+
+        res = self.client.post(EMP_URL, data)
+
+        users = get_user_model().objects.all()
+        user = get_user_model().objects.get(
+            first_name=data['first_name'],
+            last_name=data['last_name'],
+            )
+        object = models.Employees.objects.get(user=user)
+
+        self.assertEqual(res.status_code, status.HTTP_201_CREATED)
+        self.assertTrue(object)
+        self.assertEqual(len(users), 3)
+        self.assertEqual(self.created_by, object.created_by)
+        self.assertTrue(user)

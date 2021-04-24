@@ -58,7 +58,8 @@ class Subjects(models.Model):
     teacher = models.ForeignKey(
         Employees,
         on_delete=models.CASCADE,
-        related_name='subject'
+        related_name='subject',
+        null=True
         )
     course = models.ForeignKey(
         Courses,

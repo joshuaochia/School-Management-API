@@ -7,8 +7,8 @@ urlpatterns = [
     path('admin/', admin.site.urls),
 
     # APP Urls
-    path('accounts/', include('core.urls')),
-    path('', include('school.urls')),
+    # path('accounts/', include('core.urls')),
+    # path('', include('school.urls')),
 
     # APP API URLS
     path('api/auth/', include('djoser.urls')),

@@ -140,7 +140,7 @@ class StudentSubjectSerializer(serializers.ModelSerializer):
         fields = '__all__'
         read_only_fields = (
             'id', 'student', 'abs_1', 'abs_2', 'abs_3',
-            'period_1', 'period_2', 'period_3'
+            'period_1', 'period_2', 'period_3', 'avg', 'status'
             )
 
     def create(self, validated_data):

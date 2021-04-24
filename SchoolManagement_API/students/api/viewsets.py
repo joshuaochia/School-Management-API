@@ -22,7 +22,7 @@ class StudentsViewSets(viewsets.ModelViewSet):
         Permission: Only Admin can do this
     """
 
-    queryset = models.Students.objects.all()
+    queryset = models.Students.objects.all().order_by('-id')
     serializer_class = serializers.StudentsSerializer
     permission_classes = (perm.IsAdminUserOrReadOnly, )
     pagination_class = StudentLimit
@@ -73,7 +73,7 @@ class SubjectViewSet(viewsets.ModelViewSet):
     Permission: Only admin can add new subjects
     """
 
-    queryset = models.Subjects.objects.all()
+    queryset = models.Subjects.objects.all().order_by('-id')
     serializer_class = serializers.SubjectSerializer
     permission_classes = (perm.IsAdminUserOrReadOnly,)
     pagination_class = PageLimit
@@ -122,7 +122,7 @@ class ScheduleViewSet(viewsets.ModelViewSet):
     Permission: Only admin can add new subjects
     """
 
-    queryset = models.Schedule.objects.all()
+    queryset = models.Schedule.objects.all().order_by('-id')
     serializer_class = serializers.ScheduleSerializer
     permission_classes = (perm.IsAdminUserOrReadOnly, )
     pagination_class = PageLimit
@@ -137,7 +137,7 @@ class SectionViewSet(viewsets.ModelViewSet):
     Permission: Only admin can add new subjects
     """
 
-    queryset = models.Section.objects.all()
+    queryset = models.Section.objects.all().order_by('-id')
     serializer_class = serializers.SectionSerializer
     permission_classes = (perm.IsAdminUserOrReadOnly, )
     pagination_class = PageLimit
@@ -309,7 +309,9 @@ class GradesViewSet(viewsets.ViewSet):
 
     def list(self, request):
         user = self.request.user
-        query = models.StudentSubject.objects.filter(student__user=user)
+        query = models.StudentSubject.objects.filter(
+            student__user=user
+            ).order_by('-id')
         serializer = serializers.StudentSubjectSerializer(query, many=True)
 
         return Response(serializer.data)

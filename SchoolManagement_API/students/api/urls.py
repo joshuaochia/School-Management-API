@@ -2,12 +2,25 @@ from rest_framework.routers import DefaultRouter
 from django.urls import path, include
 from . import viewsets
 
+app_name = 'api_student'
 
 # Routers for admins to edit certain things for students
 admin_router = DefaultRouter()
-admin_router.register('list', viewsets.StudentsViewSets)
-admin_router.register('subject', viewsets.SubjectViewSet)
-admin_router.register('schedule', viewsets.ScheduleViewSet)
+admin_router.register(
+    'list',
+    viewsets.StudentsViewSets,
+    basename='student'
+    )
+admin_router.register(
+    'subject',
+    viewsets.SubjectViewSet,
+    basename='admin_subject'
+    )
+admin_router.register(
+    'schedule',
+    viewsets.ScheduleViewSet,
+    basename='admin_sched'
+    )
 
 # Routers for students
 user_router = DefaultRouter()
