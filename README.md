@@ -11,10 +11,16 @@ This project is open source - the sole purpose of this project is to showcase my
 ## School-Management-API Apps
 
 ### School 
+POST, PUT, PATCH:
 - Edit or add a new employee for the school (Admin Access only)
 - Edit or add policies for the school (Admin Access only)
 - Add new or edit existing departments of the school (Admin Access only)
 -  Add new or edit existing departments of the school (Admin Access only)
+
+GET:
+- School Detail, policies, departments, courses, and employees
+
+![](readme-images/school_datas.png)
 
 
 
