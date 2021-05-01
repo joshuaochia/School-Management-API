@@ -26,7 +26,7 @@ class Command(BaseCommand):
             )
 
             if department[1]:
-                department.save()
+                department[0].save()
                 self.stdout.write(
                     self.style.SUCCESS('Creating data...')
                     )

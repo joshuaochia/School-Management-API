@@ -6,10 +6,10 @@ from rest_framework import status
 from .. import models
 import random
 from faker import Faker
-from school.models import Employees, Department
+from school.models import Employees, Department, Section, Schedule, Subjects
 
 fake = Faker()
-SUBJECT_LIST_URL = reverse('api_student:admin_subject-list')
+SUBJECT_LIST_URL = reverse('api_school:admin_subject-list')
 
 
 def teacher_sample(user, school, ):
@@ -65,7 +65,7 @@ def sched_sample():
         ('Sunday', 'Sunday'),
         ]
 
-    sched = models.Schedule.objects.create(
+    sched = Schedule.objects.create(
         start=fake.time(),
         end=fake.time(),
         day=random.choice(days)[0]
@@ -76,7 +76,7 @@ def sched_sample():
 
 def section_sample():
 
-    return models.Section.objects.create(name='Sample', code='Sample')
+    return Section.objects.create(name='Sample', code='Sample')
 
 
 class PublicAPI(TestCase):
@@ -110,7 +110,7 @@ class PublicAPI(TestCase):
         }
 
         res = self.client.post(SUBJECT_LIST_URL, data)
-        query = models.Subjects.objects.all()
+        query = Subjects.objects.all()
 
         self.assertEqual(res.status_code, status.HTTP_401_UNAUTHORIZED)
         self.assertEqual(len(query), 0)
@@ -155,7 +155,7 @@ class PrivateAPI(TestCase):
         }
 
         res = self.client.post(SUBJECT_LIST_URL, data)
-        query = models.Subjects.objects.all()
+        query = Subjects.objects.all()
 
         self.assertEqual(res.status_code, status.HTTP_403_FORBIDDEN)
         self.assertEqual(len(query), 0)
@@ -189,20 +189,17 @@ class SuperUserAPI(TestCase):
     def test_api_post(self):
 
         data = {
-            "section": self.sec,
-            "schedule": self.sched,
-            "schedule_id": self.sched.id,
-            "section_id": self.sec.id,
             "name": "Product Management",
             "code": "MKT - 008",
             "unit": 3,
             "lab": 0,
+            "school": self.school.id,
             "course": self.course.id,
-            "teacher": self.teach.id,
+            "cost": 200
         }
 
         res = self.client.post(SUBJECT_LIST_URL, data)
-        query = models.Subjects.objects.all()
+        query = Subjects.objects.all()
 
         self.assertEqual(res.status_code, status.HTTP_201_CREATED)
         self.assertEqual(len(query), 1)

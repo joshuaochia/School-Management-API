@@ -1,6 +1,7 @@
 from rest_framework import serializers
 from .. import models
 from django.contrib.auth import get_user_model
+from school.models import TeacherSubject
 
 
 # Serializer for school admin that facilicate students start here
@@ -64,76 +65,7 @@ class StudentsSerializer(serializers.ModelSerializer):
 
         return models.Students.objects.create(**validated_data)
 
-
-class SectionSerializer(serializers.ModelSerializer):
-
-    """
-    Save new student.models.section or edit existing one
-    """
-
-    class Meta:
-        model = models.Section
-        fields = '__all__'
-        read_only_fields = ('id',)
-
-
-class ScheduleSerializer(serializers.ModelSerializer):
-
-    """
-    Save new student.models.Schedule or edit existing one
-    """
-
-    class Meta:
-        model = models.Schedule
-        fields = '__all__'
-        read_only_fields = ('id',)
-
-
-class SubjectSerializer(serializers.ModelSerializer):
-
-    """
-    Create new subject for the school.
-    Also: Nested serializer for StudentSubjectSerializer for reading
-    """
-
-    schedule = serializers.StringRelatedField(read_only=True)
-    section = serializers.StringRelatedField(read_only=True)
-    schedule_id = serializers.PrimaryKeyRelatedField(
-        queryset=models.Schedule.objects.all(),
-        write_only=True
-        )
-    section_id = serializers.PrimaryKeyRelatedField(
-        queryset=models.Section.objects.all(),
-        write_only=True
-        )
-
-    class Meta:
-        model = models.Subjects
-        fields = '__all__'
-        read_only_fields = ('id',)
-
-    def create(self, validated_data):
-
-        schedule_id = validated_data.pop('schedule_id')
-        section_id = validated_data.pop('section_id')
-
-        validated_data['schedule'] = schedule_id
-        validated_data['section'] = section_id
-
-        return models.Subjects.objects.create(**validated_data)
-
-
-class StudentSubjectSerializer(serializers.ModelSerializer):
-
-    """
-    Serializer for adding new subject on enrolled students
-    """
-
-    subject = SubjectSerializer(read_only=True)
-    subject_id = serializers.PrimaryKeyRelatedField(
-        queryset=models.Subjects.objects.all(),
-        write_only=True
-        )
+class TeacherStudents(serializers.ModelSerializer):
 
     class Meta:
         model = models.StudentSubject
@@ -143,14 +75,38 @@ class StudentSubjectSerializer(serializers.ModelSerializer):
             'period_1', 'period_2', 'period_3', 'avg', 'status'
             )
 
-    def create(self, validated_data):
 
-        subject_id = validated_data.pop('subject_id')
-        validated_data['subject'] = subject_id
+class TeacherSubjectSerializer(serializers.ModelSerializer):
 
-        q = models.StudentSubject.objects.create(**validated_data)
+    """
+    Serializer for viewing all of subjects handled by
+    logged in teacher/professor
+    """
+    teacher = serializers.StringRelatedField(read_only=True)
+    section = serializers.StringRelatedField(read_only=True)
+    schedule = serializers.StringRelatedField(read_only=True)
+    # subject = serializers.StringRelatedField(read_only=True)
+    student = TeacherStudents(read_only=True, many=True)
 
-        return q
+
+    class Meta:
+        model = TeacherSubject
+        fields = ('id','teacher', 'section', 'schedule', 'subject', 'student')
+        read_only_fields = ('id','teacher', 'section', 'schedule', 'subject', )
+
+class StudentSubjectSerializer(serializers.ModelSerializer):
+
+    """
+    Serializer for adding new subject on enrolled students
+    """
+
+    class Meta:
+        model = models.StudentSubject
+        fields = '__all__'
+        read_only_fields = (
+            'id', 'student', 'abs_1', 'abs_2', 'abs_3',
+            'period_1', 'period_2', 'period_3', 'avg', 'status'
+            )
 
 # Serializer for school admin that facilicate students ends here
 
@@ -304,22 +260,6 @@ class ClassMateSerializer(serializers.ModelSerializer):
 
 # Serializers for logged in teacher starts here
 
-class TeacherSubjectSerializer(serializers.ModelSerializer):
-
-    """
-    Serializer for viewing all of subjects handled by
-    logged in teacher/professor
-    """
-
-    course = serializers.StringRelatedField(read_only=True)
-    schedule = serializers.StringRelatedField(read_only=True)
-    teacher = serializers.StringRelatedField(read_only=True)
-    section = serializers.StringRelatedField(read_only=True)
-    student_subject = ClassMateSerializer(many=True, read_only=True)
-
-    class Meta:
-        model = models.Subjects
-        fields = '__all__'
 
 
 class TeacherStudentSerializer(serializers.ModelSerializer):

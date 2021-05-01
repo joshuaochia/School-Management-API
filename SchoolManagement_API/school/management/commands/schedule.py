@@ -1,5 +1,5 @@
 from django.core.management.base import BaseCommand
-from students.models import Schedule
+from ...models import Schedule
 from faker import Faker
 import random
 

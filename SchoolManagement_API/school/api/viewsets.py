@@ -9,24 +9,16 @@ from django.shortcuts import get_object_or_404
 from . import pagination as pag
 
 
-class SchoolViewSet(viewsets.ModelViewSet):
+class BaseAttrViewSet(viewsets.ModelViewSet):
 
-    queryset = models.School.objects.all()
-    serializer_class = serializers.SchoolSerializer
-    permission_classes = (perm.IsAdminUserOrReadOnly, )
     authentication_classes = (authentication.TokenAuthentication, )
-    action_method = ['POST', 'GET', 'PATCH', 'DELETE']
 
     def get_serializer_class(self):
 
-        if self.action == 'policies':
-            return serializers.PoliciesSerializer
-        if self.action == 'departments':
-            return serializers.DepartmentSerializer
-        if self.action == 'courses':
-            return serializers.CoursesSerializer
-
-        return self.serializer_class
+        try:
+            return self.serializer_class_by_action[self.action]
+        except:
+            return super().get_serializer_class()
 
     def filtering(self, request, querys):
         """
@@ -51,7 +43,7 @@ class SchoolViewSet(viewsets.ModelViewSet):
 
         return Response(serializer.data)
 
-    def actionhelper(self, request, query, obj):
+    def actionhelper(self, request, query, obj_map):
         """
         Helper for @action decoration POST or Delete Method
         """
@@ -60,12 +52,27 @@ class SchoolViewSet(viewsets.ModelViewSet):
             serializer = self.get_serializer(data=request.data)
 
             serializer.is_valid(raise_exception=True)
-            serializer.save(school=obj)
+            serializer.save(**obj_map)
             return Response(serializer.data)
 
         if request.method == 'DELETE':
             query.delete()
             return Response(status=status.HTTP_204_NO_CONTENT)
+
+class SchoolViewSet(BaseAttrViewSet):
+
+    queryset = models.School.objects.all()
+    serializer_class = serializers.SchoolSerializer
+    permission_classes = (perm.IsAdminUserOrReadOnly, )
+    authentication_classes = (authentication.TokenAuthentication, )
+    action_method = ['POST', 'GET', 'PATCH', 'DELETE']
+
+    serializer_class_by_action = {
+        'policies': serializers.PoliciesSerializer,
+        'departments': serializers.DepartmentSerializer,
+        'courses': serializers.CoursesSerializer
+    }
+
 
     @action(detail=True, methods=action_method, url_path='policies')
     def policies(self, request, pk=None):
@@ -73,6 +80,10 @@ class SchoolViewSet(viewsets.ModelViewSet):
         obj = self.get_object()
         query = models.Policies.objects.filter(school=obj)
         serializer = self.get_serializer(query, many=True)
+
+        obj_map = {
+            'school': obj
+        }
 
         # Filter a Policy object (Feature: Delete, Update)
         id = self.request.query_params.get('id')
@@ -82,7 +93,7 @@ class SchoolViewSet(viewsets.ModelViewSet):
             return self.filtering(request, filter_object)
 
         # Post and Delete Method
-        self.actionhelper(request, query, obj)
+        self.actionhelper(request, query, obj_map)
 
         return Response(serializer.data)
 
@@ -93,6 +104,10 @@ class SchoolViewSet(viewsets.ModelViewSet):
         query = models.Department.objects.filter(school=obj)
         serializer = self.get_serializer(query, many=True)
 
+        obj_map = {
+            'school': obj
+        }
+
         # Filter a Department object (Feature: Delete, Update)
         id = self.request.query_params.get('id')
 
@@ -101,7 +116,7 @@ class SchoolViewSet(viewsets.ModelViewSet):
             return self.filtering(request, filter_object)
 
         # Post and Delete Method
-        self.actionhelper(request, query, obj)
+        self.actionhelper(request, query, obj_map)
 
         return Response(serializer.data)
 
@@ -112,6 +127,10 @@ class SchoolViewSet(viewsets.ModelViewSet):
         query = models.Courses.objects.filter(school=obj)
         serializer = self.get_serializer(query, many=True)
 
+        obj_map = {
+            'school': obj
+        }
+
         # Filtering base on ID
         id = self.request.query_params.get('id')
 
@@ -120,26 +139,45 @@ class SchoolViewSet(viewsets.ModelViewSet):
             return self.filtering(request, filter_object)
 
         # Post and Delete Method
-        self.actionhelper(request, query, obj)
+        self.actionhelper(request, query, obj_map)
 
         return Response(serializer.data)
 
 
-class EmployeeViewSet(viewsets.ModelViewSet):
+class EmployeeViewSet(BaseAttrViewSet):
 
     queryset = models.Employees.objects.all().order_by('-id')
     serializer_class = serializers.EmployeesSerializer
     permission_classes = (perm.EmployeeOrReadOnly, )
-    authentication_classes = (authentication.TokenAuthentication, )
     filter_backends = [filters.SearchFilter, ]
     search_fields = ['=position', ]
     pagination_class = (pag.EmployeesPageLimit)
+
+    serializer_class_by_action = {
+        'add_subject': serializers.TeacherAddSubject,
+    }
 
     def perform_create(self, serializer):
 
         user = self.request.user
         school = get_object_or_404(models.School, pk=1)
         return serializer.save(created_by=user, school=school)
+
+    @action(detail=True, methods=['GET', 'POST'], url_path='add-subject')
+    def add_subject(self, request, pk=None):
+        
+        teacher = self.get_object()
+        query = models.TeacherSubject.objects.filter(teacher=teacher)
+
+        obj_map = {
+            'teacher': teacher
+        }
+
+        serializer = self.get_serializer(query, many=True)
+
+        self.actionhelper(request, query, obj_map)
+
+        return Response(serializer.data)
 
 
 class OwnProfileViewSet(generics.RetrieveUpdateDestroyAPIView):
@@ -150,3 +188,44 @@ class OwnProfileViewSet(generics.RetrieveUpdateDestroyAPIView):
 
     def get_object(self):
         return get_object_or_404(models.Employees, user=self.request.user)
+
+
+class SubjectViewSet(viewsets.ModelViewSet):
+
+    """
+    Add, edit, delete, etc.. a new subject.
+    Permission: Only admin can add new subjects
+    """
+
+    queryset = models.Subjects.objects.all().order_by('-id')
+    serializer_class = serializers.SubjectSerializer
+    permission_classes = (perm.IsAdminUserOrReadOnly,)
+    pagination_class = pag.PageLimit
+
+class ScheduleViewSet(viewsets.ModelViewSet):
+
+    """
+    Creating, editing, deleting new schedule for students
+    Permission: Only admin can add new subjects
+    """
+
+    queryset = models.Schedule.objects.all().order_by('-id')
+    serializer_class = serializers.ScheduleSerializer
+    permission_classes = (perm.IsAdminUserOrReadOnly, )
+    pagination_class = pag.PageLimit
+    filter_backends = [filters.SearchFilter, ]
+    search_fields = ['day', ]
+
+
+class SectionViewSet(viewsets.ModelViewSet):
+
+    """
+    Viewset for adding, deleting, and editing new section for the students
+    Permission: Only admin can add new subjects
+    """
+
+    queryset = models.Section.objects.all().order_by('-id')
+    authentication_classes = (authentication.TokenAuthentication, )
+    serializer_class = serializers.SectionSerializer
+    permission_classes = (perm.IsAdminUserOrReadOnly, )
+    pagination_class = pag.PageLimit

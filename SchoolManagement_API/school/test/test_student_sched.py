@@ -7,7 +7,7 @@ from .. import models
 import random
 from faker import Faker
 
-SCHED_URL = reverse('api_student:admin_sched-list')
+SCHED_URL = reverse('api_school:admin_sched-list')
 fake = Faker()
 
 days = [

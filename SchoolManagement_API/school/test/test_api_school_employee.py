@@ -164,13 +164,6 @@ class EmployeeSuperUserAPI(TestCase):
     def setUp(self):
 
         self.school = school_sample()
-        self.user = get_user_model().objects.create_user(
-            email='user@gmail.com',
-            first_name='Normal',
-            last_name='User',
-            middle_name='placeholder',
-            password='TestPass!23'
-        )
         self.created_by = get_user_model().objects.create_superuser(
             email='created.by@gmail.com',
             first_name='created',
@@ -209,6 +202,9 @@ class EmployeeSuperUserAPI(TestCase):
             "zip_code": 9000,
             'sex': s,
             'civil_status': stat,
+            "rate": 20,
+            "salary": 3500,
+            "days_week": 200
         }
 
         res = self.client.post(EMP_URL, data)
@@ -222,6 +218,6 @@ class EmployeeSuperUserAPI(TestCase):
 
         self.assertEqual(res.status_code, status.HTTP_201_CREATED)
         self.assertTrue(object)
-        self.assertEqual(len(users), 3)
+        self.assertEqual(len(users), 2)
         self.assertEqual(self.created_by, object.created_by)
         self.assertTrue(user)

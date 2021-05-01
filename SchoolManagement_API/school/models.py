@@ -1,10 +1,19 @@
 from django.db import models
 from django_countries.fields import CountryField
 from django.utils.translation import ugettext_lazy as _
-from .conf import majors, courses, sex, status
+from .conf import majors, courses, status, sex
 from django.conf import settings
 from django.utils.text import slugify
 
+days = [
+    ('Monday', 'Monday'),
+    ('Tuesday', 'Tuesday'),
+    ('Wednesday', 'Wednesday'),
+    ('Thursday', 'Thursday'),
+    ('Friday', 'Friday'),
+    ('Saturday', 'Saturday'),
+    ('Sunday', 'Sunday'),
+]
 
 class School(models.Model):
 
@@ -48,7 +57,6 @@ class Department(models.Model):
         on_delete=models.CASCADE,
         related_name='departments'
         )
-    staff = models.ManyToManyField(School, through='employees')
     name = models.CharField(max_length=255)
 
     def __str__(self):
@@ -72,7 +80,6 @@ class Courses(models.Model):
     def __str__(self):
 
         return self.course + ' major in ' + self.major
-
 
 class Employees(models.Model):
 
@@ -113,8 +120,14 @@ class Employees(models.Model):
         null=True,
         default='Single'
         )
-
+    rate = models.PositiveSmallIntegerField(verbose_name='Daily Rate')
+    days_week = models.PositiveSmallIntegerField(verbose_name='Weekly Hrs')
+    salary = models.PositiveIntegerField(default=0)
     slug = models.SlugField(null=True)
+    is_employee = models.BooleanField(default=True)
+    is_teacher = models.BooleanField(default=False)
+    is_hr = models.BooleanField(default=False)
+    
 
     class Meta:
         verbose_name = _('Employee')
@@ -127,3 +140,76 @@ class Employees(models.Model):
     def __str__(self):
 
         return f'{self.user} of {self.department} ({self.school})'
+
+
+class Schedule(models.Model):
+
+    start = models.TimeField()
+    end = models.TimeField()
+    day = models.CharField(max_length=55, choices=days)
+
+    def __str__(self):
+
+        return f"{self.start} - {self.end} ({self.day})"
+
+
+class Section(models.Model):
+
+    name = models.CharField(max_length=255)
+    code = models.CharField(max_length=255, verbose_name='Room Code')
+
+    def __str__(self):
+        return f"{self.name} (Room {self.code})"
+
+
+class Subjects(models.Model):
+
+    name = models.CharField(max_length=556)
+    school = models.ForeignKey(
+        School,
+        on_delete=models.CASCADE,
+        )
+    course = models.ForeignKey(
+        Courses,
+        on_delete=models.CASCADE,
+        related_name = 'subject_course'
+        )
+    code = models.CharField(max_length=55, verbose_name='Subject Code')
+    unit = models.PositiveSmallIntegerField()
+    lab = models.PositiveSmallIntegerField()
+    cost = models.IntegerField()
+
+
+    class Meta:
+        verbose_name = _('Subject')
+        verbose_name_plural = _('Subjects')
+
+    def __str__(self):
+        return f"{self.name}"
+
+class TeacherSubject(models.Model):
+
+    teacher = models.ForeignKey(
+        Employees,
+        on_delete=models.CASCADE,
+        null=True,
+        related_name='teacher_sub'
+        )
+    subject = models.ForeignKey(
+        Subjects,
+        on_delete=models.CASCADE,
+        related_name='sub_teacher'
+    )
+    schedule = models.ForeignKey(
+        Schedule,
+        on_delete=models.CASCADE,
+
+    )
+    section = models.ForeignKey(
+        Section,
+        on_delete=models.CASCADE,
+    )
+
+
+    def __str__(self):
+        return f'{self.subject} ({self.section.code}) {self.schedule}'

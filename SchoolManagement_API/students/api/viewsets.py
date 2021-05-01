@@ -13,32 +13,18 @@ from django.shortcuts import get_object_or_404
 
 # viewsets for admin to facilitate students starts here
 
+class BaseAttrViewSet(viewsets.ModelViewSet):
 
-class StudentsViewSets(viewsets.ModelViewSet):
-
-    """ Viewset for creating new students with action of adding, deleting, and
-        editing (Subject, section, and schedule).
-
-        Permission: Only Admin can do this
-    """
-
-    queryset = models.Students.objects.all().order_by('-id')
-    serializer_class = serializers.StudentsSerializer
-    permission_classes = (perm.IsAdminUserOrReadOnly, )
-    pagination_class = StudentLimit
 
     def get_serializer_class(self):
 
-        if self.action == 'subject':
-            return serializers.StudentSubjectSerializer
+        try:
+            return self.serializer_class_by_action[self.action]
+        except:
+            return super().get_serializer_class()
 
-        return self.serializer_class
 
-    def perform_create(self, serializer):
-        obj = get_object_or_404(School, pk=1)
-        return serializer.save(school=obj)
-
-    def actionhelper(self, request, query, obj):
+    def actionhelper(self, request, query, obj_map):
 
         """
         Helper for @action decoration POST or Delete Method
@@ -47,131 +33,12 @@ class StudentsViewSets(viewsets.ModelViewSet):
         if request.method == 'POST':
             serializer = self.get_serializer(data=request.data)
             serializer.is_valid(raise_exception=True)
-            serializer.save(student=obj)
+            serializer.save(**obj_map)
             return Response(serializer.data)
 
         if request.method == 'DELETE':
             query.delete()
             return Response(status=status.HTTP_204_NO_CONTENT)
-
-    @action(methods=['POST', 'GET'], detail=True, url_path='add-subject')
-    def subject(self, request, pk=None):
-
-        obj = self.get_object()
-        query = models.StudentSubject.objects.filter(student=obj)
-        serializer = self.get_serializer(query, many=True)
-
-        self.actionhelper(request, query, obj)
-
-        return Response(serializer.data)
-
-
-class SubjectViewSet(viewsets.ModelViewSet):
-
-    """
-    Add, edit, delete, etc.. a new subject.
-    Permission: Only admin can add new subjects
-    """
-
-    queryset = models.Subjects.objects.all().order_by('-id')
-    serializer_class = serializers.SubjectSerializer
-    permission_classes = (perm.IsAdminUserOrReadOnly,)
-    pagination_class = PageLimit
-
-    def get_serializer_class(self):
-
-        if self.action == 'schedule':
-            return serializers.ScheduleSerializer
-
-        return self.serializer_class
-
-    def actionhelper(self, request, query, obj):
-        """
-        Helper for @action decoration POST or Delete Method
-        """
-        if request.method == 'DELETE':
-            query.delete()
-            return Response(status=status.HTTP_204_NO_CONTENT)
-
-        if request.method == 'PATCH':
-            serializer = self.get_serializer(
-                query,
-                data=request.data,
-                partial=True,
-                )
-            serializer.is_valid(raise_exception=True)
-            serializer.save()
-            return Response(serializer.data)
-
-    @action(methods=['GET', 'PATCH', ], detail=True, url_path='schedule')
-    def schedule(self, request, pk=None):
-
-        obj = self.get_object()
-        query = models.Schedule.objects.get(subject=obj)
-        serializer = self.get_serializer(query)
-
-        self.actionhelper(request, query, obj)
-
-        return Response(serializer.data)
-
-
-class ScheduleViewSet(viewsets.ModelViewSet):
-
-    """
-    Creating, editing, deleting new schedule for students
-    Permission: Only admin can add new subjects
-    """
-
-    queryset = models.Schedule.objects.all().order_by('-id')
-    serializer_class = serializers.ScheduleSerializer
-    permission_classes = (perm.IsAdminUserOrReadOnly, )
-    pagination_class = PageLimit
-    filter_backends = [filters.SearchFilter, ]
-    search_fields = ['day', ]
-
-
-class SectionViewSet(viewsets.ModelViewSet):
-
-    """
-    Viewset for adding, deleting, and editing new section for the students
-    Permission: Only admin can add new subjects
-    """
-
-    queryset = models.Section.objects.all().order_by('-id')
-    serializer_class = serializers.SectionSerializer
-    permission_classes = (perm.IsAdminUserOrReadOnly, )
-    pagination_class = PageLimit
-
-# viewsets for admin to facilitate students ends here
-
-# viewsets for logged in teacher ends here
-
-
-class TeacherSubjectViewSet(viewsets.ModelViewSet):
-
-    """
-    Viewset for viewing all the subjects handled by a teacher and there's
-    a feature of adding grades and absencees for each students
-    """
-
-    permission_classes = [permissions.IsAuthenticated, ]
-    serializer_class = serializers.TeacherSubjectSerializer
-
-    def get_queryset(self):
-
-        user = self.request.user
-        return models.Subjects.objects.filter(teacher__user=user)
-
-    def get_serializer_class(self):
-
-        if self.action == 'add_grades':
-            return serializers.TeacherStudentSerializer
-        if self.action == 'assignment':
-            return serializers.TeacherAssignmentSerializer
-        if self.action == 'project':
-            return serializers.TeacherProjectSerializer
-
-        return self.serializer_class
 
     def filtering(self, request, querys):
 
@@ -195,24 +62,69 @@ class TeacherSubjectViewSet(viewsets.ModelViewSet):
             querys.delete()
             return Response(status=status.HTTP_204_NO_CONTENT)
 
+
+class StudentsViewSets(BaseAttrViewSet):
+
+    """ Viewset for creating new students with action of adding, deleting, and
+        editing (Subject, section, and schedule).
+
+        Permission: Only Admin can do this
+    """
+
+    queryset = models.Students.objects.all().order_by('-id')
+    serializer_class = serializers.StudentsSerializer
+    permission_classes = (perm.IsAdminUserOrReadOnly, )
+    pagination_class = StudentLimit
+
+    serializer_class_by_action = {
+        'subject': serializers.StudentSubjectSerializer,
+    }
+
+    def perform_create(self, serializer):
+        obj = get_object_or_404(School, pk=1)
+        return serializer.save(school=obj)
+
+    @action(methods=['POST', 'GET'], detail=True, url_path='add-subject')
+    def subject(self, request, pk=None):
+
+        obj = self.get_object()
+        query = models.StudentSubject.objects.filter(student=obj)
+        serializer = self.get_serializer(query, many=True)
+
+        obj_map = {
+            'student': obj
+        }
+
+        self.actionhelper(request, query, obj_map)
+
         return Response(serializer.data)
 
-    def actionhelper(self, request, query, obj):
 
-        """
-        Helper for @action decoration POST or Delete Method
-        """
+# viewsets for admin to facilitate students ends here
 
-        if request.method == 'POST':
-            serializer = self.get_serializer(data=request.data)
+# viewsets for logged in teacher ends here
 
-            serializer.is_valid(raise_exception=True)
-            serializer.save(subject=obj)
-            return Response(serializer.data)
 
-        if request.method == 'DELETE':
-            query.delete()
-            return Response(status=status.HTTP_204_NO_CONTENT)
+class TeacherSubjectViewSet(BaseAttrViewSet):
+
+    """
+    Viewset for viewing all the subjects handled by a teacher and there's
+    a feature of adding grades and absencees for each students
+    """
+
+    permission_classes = [perm.TeacherOnly, ]
+    serializer_class = serializers.TeacherSubjectSerializer
+    serializer_class_by_action = {
+        'add_grades': serializers.TeacherStudentSerializer,
+        'assignment': serializers.TeacherAssignmentSerializer,
+        'project': serializers.TeacherProjectSerializer
+    }
+
+    def get_queryset(self):
+
+        user = self.request.user
+        return models.TeacherSubject.objects.filter(teacher__user=user)
+
 
     @action(detail=True, methods=['GET', 'PUT'], url_path='grades')
     def add_grades(self, request, pk=None):
@@ -252,10 +164,11 @@ class TeacherSubjectViewSet(viewsets.ModelViewSet):
         """
 
         obj = self.get_object()
-        query = models.Assignment.objects.filter(subject=obj)
-        serializer = self.get_serializer(query, many=True)
-
-        self.actionhelper(request, query, obj)
+        user = self.request.user
+        query = models.Assignment.objects.filter(
+            subject__teacher__user=user,
+            subject=obj
+            )
 
         id = self.request.query_params.get('id')
 
@@ -267,6 +180,14 @@ class TeacherSubjectViewSet(viewsets.ModelViewSet):
                 )
             return self.filtering(request, q)
 
+        obj_mapping = {
+            'teacher': obj
+        }
+
+        self.actionhelper(request, query, obj_mapping)
+
+        serializer = self.get_serializer(query, many=True)
+
         return Response(serializer.data)
 
     @action(methods=['GET', 'PUT', 'POST'], detail=True, url_path='project')
@@ -276,8 +197,12 @@ class TeacherSubjectViewSet(viewsets.ModelViewSet):
         endpoint for adding new project for a particual subject
         and assigning it to students
         """
+        user = self.request.user
         obj = self.get_object()
-        query = models.Project.objects.filter(subject=obj)
+        query = models.Project.objects.filter(
+           subject__teacher__user=user,
+           subject=obj
+            )
         serializer = self.get_serializer(query, many=True)
 
         id = self.request.query_params.get('id')
@@ -290,7 +215,11 @@ class TeacherSubjectViewSet(viewsets.ModelViewSet):
                 )
             return self.filtering(request, q)
 
-        self.actionhelper(request, query, obj)
+        obj_mapping = {
+            'teacher': obj
+        }
+
+        self.actionhelper(request, query, obj_mapping)
 
         return Response(serializer.data)
 
@@ -298,23 +227,6 @@ class TeacherSubjectViewSet(viewsets.ModelViewSet):
 
 # viewsets for logged in student starts here
 
-
-class GradesViewSet(viewsets.ViewSet):
-
-    """
-    Viewset only for students to view their grades and schedule
-    """
-    permission_classes = (permissions.IsAuthenticated,)
-    pagination_class = PageLimit
-
-    def list(self, request):
-        user = self.request.user
-        query = models.StudentSubject.objects.filter(
-            student__user=user
-            ).order_by('-id')
-        serializer = serializers.StudentSubjectSerializer(query, many=True)
-
-        return Response(serializer.data)
 
 
 class StudentProfile(generics.RetrieveUpdateDestroyAPIView):
@@ -329,13 +241,21 @@ class StudentProfile(generics.RetrieveUpdateDestroyAPIView):
         return get_object_or_404(models.Students, user=self.request.user)
 
 
-class ClassMateViewSet(viewsets.ModelViewSet):
+class SubjectViewSet(BaseAttrViewSet):
 
     """
     Viewset for viewing all subjects of current student
     """
 
-    serializer_class = serializers.ClassMateSerializer
+    serializer_class = serializers.StudentSubjectSerializer
+    permission_classes = (perm.IsAdminUserOrReadOnly, )
+
+    serializer_class_by_action = {
+        'list': serializers.ClassMateSerializer,
+        'classmates': serializers.StudentOwnerSerializer,
+        'assignments': serializers.StudentAssignmentSerializer,
+        'projects': serializers.StudentProjectSerializer
+    }
 
     def get_queryset(self):
 
@@ -343,34 +263,6 @@ class ClassMateViewSet(viewsets.ModelViewSet):
         query = models.StudentSubject.objects.filter(student__user=user)
         return query
 
-    def get_serializer_class(self):
-
-        if self.action == 'classmates':
-            return serializers.StudentOwnerSerializer
-        if self.action == 'assignments':
-            return serializers.StudentAssignmentSerializer
-        if self.action == 'projects':
-            return serializers.StudentProjectSerializer
-
-        return self.serializer_class
-
-    def filtering(self, request, querys):
-        """
-        Function for filtering using ?id={pk} (Feature: Update or Delete)
-        The filtered model.
-        """
-        serializer = self.get_serializer(querys)
-
-        if request.method == 'PUT':
-            serializer = self.get_serializer(
-                querys,
-                data=request.data,
-                partial=True,
-            )
-            serializer.is_valid(raise_exception=True)
-            serializer.save()
-
-        return Response(serializer.data)
 
     @action(methods=['GET', ], detail=True, url_path='classmates')
     def classmates(self, request, pk=None):
@@ -379,8 +271,8 @@ class ClassMateViewSet(viewsets.ModelViewSet):
         This viewset is for viewing classmates for a specific subject
         """
 
-        obj = self.get_object()
-        query = models.Students.objects.filter(student_sub=obj)
+        obj = self.get_object().subject
+        query = models.Students.objects.filter(student_sub__subject=obj)
         serializer = self.get_serializer(query, many=True)
 
         return Response(serializer.data)

@@ -4,11 +4,12 @@ from django.contrib.auth.models import (
     )
 
 
+
 class UserManager(BaseUserManager):
 
     def create_user(
         self, email, first_name, middle_name,
-        last_name, password, **kwargs
+        last_name, password, **kwargs 
     ):
 
         if not email:
@@ -21,6 +22,7 @@ class UserManager(BaseUserManager):
             middle_name=middle_name
         )
 
+        user.is_active = True
         user.set_password(password)
         user.save(using=self._db)
         return user
@@ -75,3 +77,6 @@ class User(AbstractBaseUser, PermissionsMixin):
     def has_module_perms(self, app_label):
         # User permission to view the ap modules
         return True
+
+
+

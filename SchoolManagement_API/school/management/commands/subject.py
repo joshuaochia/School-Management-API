@@ -1,6 +1,5 @@
 from django.core.management.base import BaseCommand
-from students.models import Schedule, Subjects, Section
-from school.models import Employees, Courses
+from ...models import Schedule, Subjects, Section, Employees, Courses
 from faker import Faker
 import random
 
@@ -29,17 +28,15 @@ class Command(BaseCommand):
         success = 0
         fail = 0
 
-        for _ in range(options['first']):
+        for _ in range(options['subject']):
             code = f'{random.choice(self.code)} {fake.random_int(min=3,max=3)}'
             sub = Subjects.objects.get_or_create(
                 name=fake.company(),
-                teacher=random.choice(self.teach),
                 course=random.choice(self.course),
                 code=code,
                 unit=fake.random_int(min=1, max=1),
                 lab=0,
-                schedule=random.choice(self.sched),
-                section=random.choice(self.sec)
+                cost = fake.random_int(min=3, max=3)
             )
 
             if sub[1]:

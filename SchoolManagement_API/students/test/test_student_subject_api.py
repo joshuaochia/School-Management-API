@@ -4,6 +4,7 @@ from django.test import TestCase
 from django.urls import reverse
 from rest_framework import status
 from .. import models
+from school.models import Section, Schedule, Subjects, TeacherSubject
 
 import random
 from faker import Faker
@@ -48,7 +49,7 @@ def sched_sample():
         ('Sunday', 'Sunday'),
         ]
 
-    sched = models.Schedule.objects.create(
+    sched = Schedule.objects.create(
         start=fake.time(),
         end=fake.time(),
         day=random.choice(days)[0]
@@ -59,25 +60,31 @@ def sched_sample():
 
 def section_sample():
 
-    return models.Section.objects.create(name='Sample', code='Sample')
+    return Section.objects.create(name='Sample', code='Sample')
 
 
-def subject_sample(sample_course):
+def subject_sample(sample_course, school):
 
-    sec = section_sample()
-    sched = sched_sample()
-    sub = models.Subjects.objects.create(
+    sub = Subjects.objects.create(
         name='TEST SUB',
-        teacher=None,
         course=sample_course,
         unit=0,
         lab=0,
-        section=sec,
-        schedule=sched
+        cost = 200,
+        school = school
     )
 
     return sub
 
+def teacher_sub_sample(subject, schedule, section):
+
+    teach_sub = TeacherSubject.objects.create(
+        subject=subject,
+        schedule=schedule,
+        section=section
+    )
+
+    return teach_sub
 
 def student_sample(school_sample, course_sample):
 
@@ -121,7 +128,7 @@ class PublicAPI(TestCase):
     def test_post_api(self):
 
         url = subject_url(self.student.id)
-        sub = subject_sample(self.course)
+        sub = subject_sample(self.course, self.school)
         data = {
             'subject_id': sub.id
         }
@@ -158,7 +165,7 @@ class PrivateAPI(TestCase):
     def test_post_api(self):
 
         url = subject_url(self.student.id)
-        sub = subject_sample(self.course)
+        sub = subject_sample(self.course, self.school)
         data = {
             'subject_id': sub.id
         }
@@ -179,6 +186,12 @@ class SuperUser(TestCase):
         self.school = school_sample()
         self.course = course_sample(self.school)
         self.student = student_sample(self.school, self.course)
+        self.sub = subject_sample(self.course, self.school)
+        self.sched = sched_sample()
+        self.section = section_sample()
+        self.teach_sub = teacher_sub_sample(
+            self.sub, self.sched, self.section
+        )
         self.user = get_user_model().objects.create_superuser(
             email='user@gmail.com',
             first_name='Normal',
@@ -191,9 +204,8 @@ class SuperUser(TestCase):
     def test_post_api(self):
 
         url = subject_url(self.student.id)
-        sub = subject_sample(self.course)
         data = {
-            'subject_id': sub.id
+            'subject': self.teach_sub.id
         }
 
         res = self.client.post(url, data)

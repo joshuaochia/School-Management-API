@@ -1,6 +1,6 @@
 from django.db import models
 from django.conf import settings
-from school.models import School, Courses, Employees
+from school.models import School, Courses, TeacherSubject
 from school.conf import sex, status
 from django_countries.fields import CountryField
 from django.utils.translation import ugettext_lazy as _
@@ -9,15 +9,7 @@ from django.utils import timezone
 
 # Create your models here.
 
-days = [
-    ('Monday', 'Monday'),
-    ('Tuesday', 'Tuesday'),
-    ('Wednesday', 'Wednesday'),
-    ('Thursday', 'Thursday'),
-    ('Friday', 'Friday'),
-    ('Saturday', 'Saturday'),
-    ('Sunday', 'Sunday'),
-]
+
 
 sem = [
     ('First', 'First'),
@@ -32,59 +24,6 @@ grade_status = [
 ]
 
 
-class Schedule(models.Model):
-
-    start = models.TimeField()
-    end = models.TimeField()
-    day = models.CharField(max_length=55, choices=days)
-
-    def __str__(self):
-
-        return f"{self.start} - {self.end} ({self.day})"
-
-
-class Section(models.Model):
-
-    name = models.CharField(max_length=255)
-    code = models.CharField(max_length=255, verbose_name='Room Code')
-
-    def __str__(self):
-        return f"{self.name} (Room {self.code})"
-
-
-class Subjects(models.Model):
-
-    name = models.CharField(max_length=556)
-    teacher = models.ForeignKey(
-        Employees,
-        on_delete=models.CASCADE,
-        related_name='subject',
-        null=True
-        )
-    course = models.ForeignKey(
-        Courses,
-        on_delete=models.CASCADE,
-        )
-    code = models.CharField(max_length=55, verbose_name='Subject Code')
-    unit = models.PositiveSmallIntegerField()
-    lab = models.PositiveSmallIntegerField()
-    schedule = models.ForeignKey(
-        Schedule,
-        on_delete=models.CASCADE,
-        related_name='subject'
-    )
-    section = models.ForeignKey(
-        Section,
-        on_delete=models.CASCADE,
-        related_name='subject'
-    )
-
-    class Meta:
-        verbose_name = _('Subject')
-        verbose_name_plural = _('Subjects')
-
-    def __str__(self):
-        return f"{self.name} ({self.section.code}) {self.schedule}"
 
 
 class Students(models.Model):
@@ -124,7 +63,7 @@ class Students(models.Model):
         verbose_name='Civil Status',
         null=True
         )
-    subjects = models.ManyToManyField(Subjects, through='StudentSubject')
+    subjects = models.ManyToManyField(TeacherSubject, through='StudentSubject')
     school_yr = models.CharField(default='2012', max_length=255)
     sem = models.CharField(choices=sem, max_length=55)
     slug = models.SlugField(null=True)
@@ -156,9 +95,9 @@ class StudentSubject(models.Model):
         related_name='student_sub'
     )
     subject = models.ForeignKey(
-        Subjects,
+        TeacherSubject,
         on_delete=models.CASCADE,
-        related_name='student_subject'
+        related_name='student'
     )
     period_1 = models.IntegerField(default=0)
     abs_1 = models.IntegerField(default=0)
@@ -177,7 +116,7 @@ class StudentSubject(models.Model):
 class Project(models.Model):
 
     subject = models.ForeignKey(
-        Subjects,
+        TeacherSubject,
         on_delete=models.CASCADE,
         related_name='projects'
     )
@@ -203,7 +142,7 @@ class Project(models.Model):
 class Assignment(models.Model):
 
     subject = models.ForeignKey(
-        Subjects,
+        TeacherSubject,
         on_delete=models.CASCADE,
         related_name='assignment'
     )

@@ -12,7 +12,20 @@ router.register(
     viewsets.EmployeeViewSet,
     basename='employees'
     )
-
+router.register(
+    'subject',
+    viewsets.SubjectViewSet,
+    basename='admin_subject'
+    )
+router.register(
+    'schedule',
+    viewsets.ScheduleViewSet,
+    basename='admin_sched'
+    )
+router.register(
+    'section',
+    viewsets.SectionViewSet
+)
 
 urlpatterns = [
     path('', include(router.urls)),

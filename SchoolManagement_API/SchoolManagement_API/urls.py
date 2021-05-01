@@ -15,7 +15,8 @@ urlpatterns = [
     path('api/auth/', include('djoser.urls.authtoken')),
     path('api/auth/', include('djoser.urls.jwt')),
     path('api/school/', include('school.api.urls')),
-    path('api/students/', include('students.api.urls'))
+    path('api/students/', include('students.api.urls')),
+    path('api/finance/', include('finance.api.urls')),
 ]
 
 if settings.DEBUG:

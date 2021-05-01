@@ -1,8 +1,8 @@
 from django.core.management.base import BaseCommand
 from django.shortcuts import get_object_or_404
-from students.models import Students, Subjects, StudentSubject
+from students.models import Students, StudentSubject
 from faker import Faker
-from school.models import School, Courses
+from school.models import School, Courses, TeacherSubject
 from django.contrib.auth import get_user_model
 import random
 
@@ -17,7 +17,7 @@ class Command(BaseCommand):
     """
     help = 'This the help for students fake populating'
     course = Courses.objects.all()
-    sub = Subjects.objects.all()
+    sub = TeacherSubject.objects.all()
 
     def add_arguments(self, parser) -> None:
         parser.add_argument(

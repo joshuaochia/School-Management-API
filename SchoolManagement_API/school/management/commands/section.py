@@ -1,5 +1,5 @@
 from django.core.management.base import BaseCommand
-from students.models import Section
+from ...models import Section
 from faker import Faker
 
 fake = Faker()
@@ -20,7 +20,7 @@ class Command(BaseCommand):
 
         success = 0
         fail = 0
-        for _ in range(options['first']):
+        for _ in range(options['section']):
             sec = Section.objects.get_or_create(
                 name=fake.company(),
                 code=fake.random_int(min=3, max=6)
