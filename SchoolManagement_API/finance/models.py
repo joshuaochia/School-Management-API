@@ -2,6 +2,7 @@ from django.db import models
 from django.shortcuts import get_object_or_404
 from school.models import Employees
 from django.utils.translation import ugettext_lazy as _
+from django.utils import timezone
 from django.dispatch import receiver
 from django.db.models.signals import post_save
 from students.models import StudentSubject, Students
@@ -28,9 +29,10 @@ class StudentPayment(models.Model):
     balance = models.ForeignKey(
         StudentBalance,
         on_delete=models.CASCADE,
-        related_name='student_balance'
+        related_name='payment'
     )
     money = models.PositiveSmallIntegerField()
+    created = models.DateTimeField(default=timezone.now)
 
     class Meta:
         verbose_name = _('Student Payment')

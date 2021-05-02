@@ -88,16 +88,18 @@ class StudentsViewSets(BaseAttrViewSet):
     def subject(self, request, pk=None):
 
         obj = self.get_object()
-        query = models.StudentSubject.objects.filter(student=obj)
-        serializer = self.get_serializer(query, many=True)
-
         obj_map = {
             'student': obj
         }
+        try:
+            query = models.StudentSubject.objects.filter(student=obj)
+            serializer = self.get_serializer(query, many=True)
 
-        self.actionhelper(request, query, obj_map)
+            self.actionhelper(request, query, obj_map)
 
-        return Response(serializer.data)
+            return Response(serializer.data)
+        except:
+            return Response(status=status.HTTP_400_BAD_REQUEST)
 
 
 # viewsets for admin to facilitate students ends here
@@ -135,25 +137,26 @@ class TeacherSubjectViewSet(BaseAttrViewSet):
         """
 
         instance = self.get_object()
-        user = self.request.user
-        query = models.StudentSubject.objects.filter(
-            subject__teacher__user=user,
-            subject=instance
-            )
-
-        id = self.request.query_params.get('id')
-
-        if id:
-            q = get_object_or_404(
-                models.StudentSubject,
-                pk=id,
+        try:
+            user = self.request.user
+            query = models.StudentSubject.objects.filter(
+                subject__teacher__user=user,
                 subject=instance
                 )
-            return self.filtering(request, q)
+            serializer = self.get_serializer(query, many=True)
 
-        serializer = self.get_serializer(query, many=True)
+            id = self.request.query_params.get('id')
 
-        return Response(serializer.data)
+            if id:
+                q = get_object_or_404(
+                    models.StudentSubject,
+                    pk=id,
+                    subject=instance
+                    )
+                return self.filtering(request, q)
+            return Response(serializer.data)
+        except:
+            return Response(status=status.HTTP_400_BAD_REQUEST)
 
     @action(methods=['GET', 'POST'], detail=True, url_path='assignment')
     def assignment(self, request, pk=None):
@@ -164,31 +167,32 @@ class TeacherSubjectViewSet(BaseAttrViewSet):
         """
 
         obj = self.get_object()
-        user = self.request.user
-        query = models.Assignment.objects.filter(
-            subject__teacher__user=user,
-            subject=obj
-            )
-
-        id = self.request.query_params.get('id')
-
-        if id:
-            q = get_object_or_404(
-                models.Assignment,
-                pk=id,
-                subject=obj
-                )
-            return self.filtering(request, q)
-
         obj_mapping = {
             'teacher': obj
         }
+        try:
+            user = self.request.user
+            query = models.Assignment.objects.filter(
+                subject__teacher__user=user,
+                subject=obj
+                )
+            serializer = self.get_serializer(query, many=True)
 
-        self.actionhelper(request, query, obj_mapping)
+            id = self.request.query_params.get('id')
 
-        serializer = self.get_serializer(query, many=True)
+            if id:
+                q = get_object_or_404(
+                    models.Assignment,
+                    pk=id,
+                    subject=obj
+                    )
+                return self.filtering(request, q)
 
-        return Response(serializer.data)
+            self.actionhelper(request, query, obj_mapping)
+
+            return Response(serializer.data)
+        except:
+            return Response(status=status.HTTP_400_BAD_REQUEST)
 
     @action(methods=['GET', 'PUT', 'POST'], detail=True, url_path='project')
     def project(self, request, pk=None):
@@ -197,36 +201,39 @@ class TeacherSubjectViewSet(BaseAttrViewSet):
         endpoint for adding new project for a particual subject
         and assigning it to students
         """
-        user = self.request.user
+        
         obj = self.get_object()
-        query = models.Project.objects.filter(
-           subject__teacher__user=user,
-           subject=obj
-            )
-        serializer = self.get_serializer(query, many=True)
-
-        id = self.request.query_params.get('id')
-
-        if id:
-            q = get_object_or_404(
-                models.Project,
-                pk=id,
-                subject=obj
-                )
-            return self.filtering(request, q)
-
         obj_mapping = {
             'teacher': obj
         }
+        try:
+            user = self.request.user
+            query = models.Project.objects.filter(
+            subject__teacher__user=user,
+            subject=obj
+                )
+            serializer = self.get_serializer(query, many=True)
 
-        self.actionhelper(request, query, obj_mapping)
+            id = self.request.query_params.get('id')
 
-        return Response(serializer.data)
+            if id:
+                q = get_object_or_404(
+                    models.Project,
+                    pk=id,
+                    subject=obj
+                    )
+                return self.filtering(request, q)
+
+            self.actionhelper(request, query, obj_mapping)
+
+            return Response(serializer.data)
+
+        except:
+            return Response(status=status.HTTP_400_BAD_REQUEST)
 
 # viewsets for logged in teacher ends here
 
 # viewsets for logged in student starts here
-
 
 
 class StudentProfile(generics.RetrieveUpdateDestroyAPIView):
@@ -272,10 +279,12 @@ class SubjectViewSet(BaseAttrViewSet):
         """
 
         obj = self.get_object().subject
-        query = models.Students.objects.filter(student_sub__subject=obj)
-        serializer = self.get_serializer(query, many=True)
-
-        return Response(serializer.data)
+        try:
+            query = models.Students.objects.filter(student_sub__subject=obj)
+            serializer = self.get_serializer(query, many=True)
+            return Response(serializer.data)
+        except:
+            return Response(status=status.HTTP_400_BAD_REQUEST)
 
     @action(methods=['GET', 'PUT'], detail=True, url_path='assignments')
     def assignments(self, request, pk=None):
@@ -286,23 +295,26 @@ class SubjectViewSet(BaseAttrViewSet):
         """
 
         obj = self.get_object()
-        queryset = models.Assignment.objects.filter(
-            subject=obj.subject,
-            assign=obj
-            )
-        serializer = self.get_serializer(queryset, many=True)
-
-        id = self.request.query_params.get('id')
-
-        if id:
-            query = get_object_or_404(
-                models.Assignment,
-                id=id,
+        try:
+            queryset = models.Assignment.objects.filter(
+                subject=obj.subject,
                 assign=obj
                 )
-            return self.filtering(request, query)
+            serializer = self.get_serializer(queryset, many=True)
 
-        return Response(serializer.data)
+            id = self.request.query_params.get('id')
+
+            if id:
+                query = get_object_or_404(
+                    models.Assignment,
+                    id=id,
+                    assign=obj
+                    )
+                return self.filtering(request, query)
+
+            return Response(serializer.data)
+        except:
+            return Response(status=status.HTTP_400_BAD_REQUEST)
 
     @action(methods=['GET', 'PUT'], detail=True, url_path='projects')
     def projects(self, request, pk=None):
@@ -313,22 +325,25 @@ class SubjectViewSet(BaseAttrViewSet):
         """
 
         obj = self.get_object()
-        query = models.Project.objects.filter(
-            subject=obj.subject,
-            assign=obj
-            )
-        serializer = self.get_serializer(query, many=True)
-
-        id = self.request.query_params.get('id')
-
-        if id:
-            query = get_object_or_404(
-                models.Project,
-                id=id,
+        try:
+            query = models.Project.objects.filter(
+                subject=obj.subject,
                 assign=obj
                 )
-            return self.filtering(request, query)
+            serializer = self.get_serializer(query, many=True)
 
-        return Response(serializer.data)
+            id = self.request.query_params.get('id')
+
+            if id:
+                query = get_object_or_404(
+                    models.Project,
+                    id=id,
+                    assign=obj
+                    )
+                return self.filtering(request, query)
+
+            return Response(serializer.data)
+        except:
+            return Response(status=status.HTTP_400_BAD_REQUEST)
 
 # viewsets for logged in student ends here

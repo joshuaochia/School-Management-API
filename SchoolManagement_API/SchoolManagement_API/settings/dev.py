@@ -2,7 +2,7 @@ from .base import *
 
 # Override the base settings here
 
-DEBUG = True
+DEBUG = True      
 ALLOWED_HOSTS = ['*']
 
 

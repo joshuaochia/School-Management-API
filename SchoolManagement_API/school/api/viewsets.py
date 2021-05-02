@@ -1,3 +1,4 @@
+from msilib.schema import Error
 from rest_framework import (
     viewsets, status, permissions, authentication, generics, filters
     )
@@ -78,70 +79,77 @@ class SchoolViewSet(BaseAttrViewSet):
     def policies(self, request, pk=None):
 
         obj = self.get_object()
-        query = models.Policies.objects.filter(school=obj)
-        serializer = self.get_serializer(query, many=True)
-
         obj_map = {
             'school': obj
         }
 
-        # Filter a Policy object (Feature: Delete, Update)
-        id = self.request.query_params.get('id')
+        try:
+            query = models.Policies.objects.filter(school=obj)
+            serializer = self.get_serializer(query, many=True)
 
-        if id:
-            filter_object = get_object_or_404(models.Policies, id=id)
-            return self.filtering(request, filter_object)
+        # Filter a Policy object (Feature: Delete, Update)
+            id = self.request.query_params.get('id')
+
+            if id:
+                filter_object = get_object_or_404(models.Policies, id=id)
+                return self.filtering(request, filter_object)
 
         # Post and Delete Method
-        self.actionhelper(request, query, obj_map)
+            self.actionhelper(request, query, obj_map)
 
-        return Response(serializer.data)
+            return Response(serializer.data)
+        except:
+            return Response(status=status.HTTP_400_BAD_REQUEST)
 
     @action(detail=True, methods=action_method, url_path='departments')
     def departments(self, request, pk=None):
 
         obj = self.get_object()
-        query = models.Department.objects.filter(school=obj)
-        serializer = self.get_serializer(query, many=True)
-
         obj_map = {
             'school': obj
         }
+        try:
+            query = models.Department.objects.filter(school=obj)
+            serializer = self.get_serializer(query, many=True)
 
         # Filter a Department object (Feature: Delete, Update)
-        id = self.request.query_params.get('id')
+            id = self.request.query_params.get('id')
 
-        if id:
-            filter_object = get_object_or_404(models.Department, id=id)
-            return self.filtering(request, filter_object)
-
+            if id:
+                filter_object = get_object_or_404(models.Department, id=id)
+                return self.filtering(request, filter_object)
         # Post and Delete Method
-        self.actionhelper(request, query, obj_map)
 
-        return Response(serializer.data)
+            self.actionhelper(request, query, obj_map)
+            return Response(serializer.data)
+        except:
+            return Response(status=status.HTTP_400_BAD_REQUEST)
 
     @action(detail=True, methods=action_method, url_path='courses')
     def courses(self, request, pk=None):
 
         obj = self.get_object()
-        query = models.Courses.objects.filter(school=obj)
-        serializer = self.get_serializer(query, many=True)
-
         obj_map = {
             'school': obj
         }
 
-        # Filtering base on ID
-        id = self.request.query_params.get('id')
+        try:
+            query = models.Courses.objects.filter(school=obj)
+            serializer = self.get_serializer(query, many=True)
 
-        if id:
-            filter_object = get_object_or_404(models.Courses, id=id)
-            return self.filtering(request, filter_object)
+        # Filtering base on ID
+            id = self.request.query_params.get('id')
+
+            if id:
+                filter_object = get_object_or_404(models.Courses, id=id)
+                return self.filtering(request, filter_object)
 
         # Post and Delete Method
-        self.actionhelper(request, query, obj_map)
+            self.actionhelper(request, query, obj_map)
 
-        return Response(serializer.data)
+            return Response(serializer.data)
+        except:
+            return Response(status=status.HTTP_400_BAD_REQUEST)
 
 
 class EmployeeViewSet(BaseAttrViewSet):
@@ -167,17 +175,17 @@ class EmployeeViewSet(BaseAttrViewSet):
     def add_subject(self, request, pk=None):
         
         teacher = self.get_object()
-        query = models.TeacherSubject.objects.filter(teacher=teacher)
-
         obj_map = {
             'teacher': teacher
         }
 
-        serializer = self.get_serializer(query, many=True)
-
-        self.actionhelper(request, query, obj_map)
-
-        return Response(serializer.data)
+        try:
+            query = models.TeacherSubject.objects.filter(teacher=teacher)
+            serializer = self.get_serializer(query, many=True)
+            self.actionhelper(request, query, obj_map)
+            return Response(serializer.data)
+        except:
+            return Response(status=status.HTTP_400_BAD_REQUEST)
 
 
 class OwnProfileViewSet(generics.RetrieveUpdateDestroyAPIView):

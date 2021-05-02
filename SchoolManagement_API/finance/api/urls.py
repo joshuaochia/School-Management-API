@@ -4,11 +4,16 @@ from . import viewsets
 
 app_name = 'api_finance'
 
-# Routers for admins to edit certain things for students
+# Routers for HR's to add payments, OT, or leave.
 router = DefaultRouter()
-router.register('balance', viewsets.StudentBalanceViewSet, basename='balance')
-router.register('salary', viewsets.EmployeeSalaryViewSet, basename='salary')
+router.register('balance', viewsets.AllStudentBalanceViewSet, basename='balance')
+router.register('salary', viewsets.AllEmployeeSalaryViewSet, basename='salary')
+
 
 urlpatterns = [
-    path('', include(router.urls))
+    path('', include(router.urls)),
+
+    # Url for viewing user balance if student and salary if employee
+    path('my-balance', viewsets.StudentBalanceViewSet.as_view(), name='my-balance'),
+    path('my-salary', viewsets.EmployeeSalaryViewSet.as_view(), name='my-salary')
 ]
