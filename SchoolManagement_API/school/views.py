@@ -1,6 +1,8 @@
 from django.shortcuts import render
-from django.views.generic import TemplateView
+from django.views.generic import TemplateView, DetailView, ListView
 from django.contrib.auth.mixins import LoginRequiredMixin
+from . import models
+from django.shortcuts import get_object_or_404
 # Create your views here.
 
 
@@ -18,13 +20,18 @@ def about(request):
     return render(request, 'about.html', {})
 
 
-def employees(request):
-    """
-    Renderer for About employees page
-    """
-    return render(request, 'employees.html', {})
+class EmployeesView(ListView, LoginRequiredMixin):
+
+    template_name = 'employees.html'
+    model = models.Employees
+    context_object_name = 'employees'
 
 
-class Profile(TemplateView, LoginRequiredMixin):
+class Profile(DetailView, LoginRequiredMixin):
 
     template_name = 'profile.html'
+    model = models.Employees
+    context_object_name = 'employees_detail'
+
+    def get_object(self):
+        return get_object_or_404(models.Employees, slug=self.kwargs.get('slug'))

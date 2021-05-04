@@ -23,7 +23,7 @@ def teacher_sample(user, school, ):
         user=user,
         school=school,
         department=department,
-        rate = 365,
+        rate=365,
         days_week=5,
         salary=300
     )
