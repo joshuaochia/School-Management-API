@@ -6,7 +6,6 @@ from django_countries.fields import CountryField
 from django.utils.translation import ugettext_lazy as _
 from django.utils.text import slugify
 from django.utils import timezone
-
 # Create your models here.
 
 
@@ -22,8 +21,6 @@ grade_status = [
     ('Failed', 'Failed'),
     ('INC', 'INC')
 ]
-
-
 
 
 class Students(models.Model):

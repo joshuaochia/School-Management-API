@@ -5,6 +5,7 @@ import os
 BASE_DIR = Path(__file__).resolve().parent.parent.parent
 TEMPLATE = os.path.join(BASE_DIR, 'templates')
 STATIC = os.path.join(BASE_DIR, 'static')
+LOG_DIR = os.path.join(BASE_DIR, 'logs/')
 
 SECRET_KEY = 'lr@9$owbp^!rc1q&58d7w*0w$6aoyb6xgbn7uwz00r!z6a_4t#'
 
@@ -28,6 +29,7 @@ INSTALLED_APPS = [
     #External Apps
     'djoser',
     'django_countries',
+
 
     # Internal apps
     'core',
@@ -55,6 +57,7 @@ REST_FRAMEWORK = {
         'rest_framework.authentication.TokenAuthentication',
         'rest_framework_simplejwt.authentication.JWTAuthentication',
     ),
+    'EXCEPTION_HANDLER': 'utils.exception_handler.custom_exception_handler',
     'DEFAULT_FILTER_BACKENDS': (
         'django_filters.rest_framework.DjangoFilterBackend',
         )
@@ -132,5 +135,6 @@ AUTH_USER_MODEL = 'core.User'
 #Media Config
 MEDIA_URL = '/media/'
 MEDIA_ROOT = os.path.join(BASE_DIR, 'media')
+
 
 

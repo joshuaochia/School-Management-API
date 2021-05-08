@@ -1,14 +1,13 @@
 from rest_framework import (
     viewsets, status, generics,
-    permissions
     )
 from .. import models
 from . import serializers, permissions as perm
-from .pagination import PageLimit, StudentLimit
+from .pagination import StudentLimit
 from rest_framework.decorators import action
 from rest_framework.response import Response
 from school.models import School
-from rest_framework import filters
+from utils import students_exception_handler as except_handler
 from django.shortcuts import get_object_or_404
 
 # viewsets for admin to facilitate students starts here
@@ -99,7 +98,7 @@ class StudentsViewSets(BaseAttrViewSet):
 
             return Response(serializer.data)
         except:
-            return Response(status=status.HTTP_400_BAD_REQUEST)
+            raise except_handler.ActionDecor()
 
 
 # viewsets for admin to facilitate students ends here
@@ -144,7 +143,7 @@ class TeacherSubjectViewSet(BaseAttrViewSet):
                 subject=instance
                 )
             serializer = self.get_serializer(query, many=True)
-
+            
             id = self.request.query_params.get('id')
 
             if id:
@@ -156,7 +155,7 @@ class TeacherSubjectViewSet(BaseAttrViewSet):
                 return self.filtering(request, q)
             return Response(serializer.data)
         except:
-            return Response(status=status.HTTP_400_BAD_REQUEST)
+            raise except_handler.ActionDecor()
 
     @action(methods=['GET', 'POST'], detail=True, url_path='assignment')
     def assignment(self, request, pk=None):
@@ -192,7 +191,7 @@ class TeacherSubjectViewSet(BaseAttrViewSet):
 
             return Response(serializer.data)
         except:
-            return Response(status=status.HTTP_400_BAD_REQUEST)
+            raise except_handler.ActionDecor()
 
     @action(methods=['GET', 'PUT', 'POST'], detail=True, url_path='project')
     def project(self, request, pk=None):
@@ -229,7 +228,7 @@ class TeacherSubjectViewSet(BaseAttrViewSet):
             return Response(serializer.data)
 
         except:
-            return Response(status=status.HTTP_400_BAD_REQUEST)
+            raise except_handler.ActionDecor()
 
 # viewsets for logged in teacher ends here
 
@@ -284,7 +283,7 @@ class SubjectViewSet(BaseAttrViewSet):
             serializer = self.get_serializer(query, many=True)
             return Response(serializer.data)
         except:
-            return Response(status=status.HTTP_400_BAD_REQUEST)
+            raise except_handler.ActionDecor()
 
     @action(methods=['GET', 'PUT'], detail=True, url_path='assignments')
     def assignments(self, request, pk=None):
@@ -314,7 +313,7 @@ class SubjectViewSet(BaseAttrViewSet):
 
             return Response(serializer.data)
         except:
-            return Response(status=status.HTTP_400_BAD_REQUEST)
+            raise except_handler.ActionDecor()
 
     @action(methods=['GET', 'PUT'], detail=True, url_path='projects')
     def projects(self, request, pk=None):
@@ -344,6 +343,6 @@ class SubjectViewSet(BaseAttrViewSet):
 
             return Response(serializer.data)
         except:
-            return Response(status=status.HTTP_400_BAD_REQUEST)
+            raise except_handler.ActionDecor()
 
 # viewsets for logged in student ends here

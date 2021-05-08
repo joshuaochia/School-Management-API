@@ -1,7 +1,8 @@
 from django.core.management.base import BaseCommand
-from ...models import Schedule, Subjects, Section, Employees, Courses
+from ...models import Schedule, Subjects, Section, Employees, Courses, School
 from faker import Faker
 import random
+from django.shortcuts import get_object_or_404
 
 fake = Faker()
 
@@ -27,10 +28,12 @@ class Command(BaseCommand):
 
         success = 0
         fail = 0
+        school = get_object_or_404(School, id=1)
 
         for _ in range(options['subject']):
             code = f'{random.choice(self.code)} {fake.random_int(min=3,max=3)}'
             sub = Subjects.objects.get_or_create(
+                school=school,
                 name=fake.company(),
                 course=random.choice(self.course),
                 code=code,

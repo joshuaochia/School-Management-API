@@ -7,6 +7,7 @@ from django.dispatch import receiver
 from django.db.models.signals import post_save
 from students.models import StudentSubject, Students
 from school.models import TeacherSubject, Employees
+
 # Create your models here.
 
 

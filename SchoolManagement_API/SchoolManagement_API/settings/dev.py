@@ -37,3 +37,47 @@ DATABASES = {
         'NAME': BASE_DIR / 'db.sqlite3',
     }
 }
+
+LOGGING = {
+	'version': 1,
+	'disable_existing_loggers': False,
+
+    # Filters here
+    'filters': {
+        'require_debug_true': {
+            '()': 'django.utils.log.RequireDebugTrue'
+        }
+    },
+
+    # Formatter here
+    'formatters': {
+        'simple': {
+            'format': '{levelname} {asctime} {message}',
+            'style': '{'
+        }
+    },
+
+    # Handlers here
+	'handlers': {
+		'file': {
+			'level': 'WARNING',
+			'class': 'logging.FileHandler',
+            'filename': LOG_DIR + 'debug.log',
+            'formatter': 'simple',
+        },
+        'console': {
+            'level': 'INFO',
+            'class': 'logging.StreamHandler',
+            'formatter': 'simple',
+            'filters': ['require_debug_true']
+        },
+	},
+    
+    # Logger here
+    'loggers': {
+        'django': {
+            'handlers': ['file', 'console'],
+            'level': 'INFO',
+        },
+    },
+}

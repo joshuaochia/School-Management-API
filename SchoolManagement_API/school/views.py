@@ -1,7 +1,8 @@
-from django.shortcuts import render
+from django.shortcuts import render, HttpResponse
 from django.views.generic import TemplateView, DetailView, ListView
 from django.contrib.auth.mixins import LoginRequiredMixin
 from . import models
+from django.http import Http404
 from django.shortcuts import get_object_or_404
 # Create your views here.
 
@@ -10,14 +11,32 @@ def index(request):
     """
     Renderer for Home Page
     """
-    return render(request, 'index.html', {})
+    try:
+        school = models.School.objects.get(id=1)
+    except models.School.DoesNotExist:
+        raise Http404
+
+    context = {
+        'school': school
+    }
+
+    return render(request, 'index.html', context)
 
 
 def about(request):
     """
     Renderer for About Page
     """
-    return render(request, 'about.html', {})
+    try:
+        school = models.School.objects.values_list('id' ,'vision', 'mission',).get(id=1)
+    except models.School.DoesNotExist:
+        raise Http404
+
+    context = {
+        'school': school
+    }
+
+    return render(request, 'about.html', context)
 
 
 class EmployeesView(ListView, LoginRequiredMixin):

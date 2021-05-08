@@ -1,7 +1,7 @@
-from django.http import HttpResponse
 from rest_framework import (
-    viewsets, status, permissions, authentication, generics, filters
+    viewsets, status, permissions, generics,
     )
+import logging 
 from .. import models
 from students.models import Students
 from . import serializers, permissions as perm
@@ -10,7 +10,7 @@ from rest_framework.response import Response
 from django.shortcuts import get_object_or_404
 from . import pagination as pag
 from school.models import Employees
-from school.api.serializers import EmployeesSerializer
+from utils import finance_exception_handler as exception_handler
 from django.core.exceptions import *
 
 
@@ -18,6 +18,7 @@ class AllStudentBalanceViewSet(viewsets.ModelViewSet):
 
     serializer_class = serializers.StudentBalanceSerializer
     permission_classes = (perm.IsHROnly, )
+    pagination_class = pag.GenericFinancePag
     serializer_class_by_action = {
         'payment': serializers.StudentPaymentsSerializer
     }
@@ -57,7 +58,10 @@ class AllStudentBalanceViewSet(viewsets.ModelViewSet):
                 return Response(serializer.data)
             return Response(serializer.data)
         except:
-            return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
+            raise exception_handler.ActionDecor(
+                detail="Server is down, can't pay right now.",
+                code="payments_error"
+                )
 
 class StudentBalanceViewSet(generics.RetrieveAPIView):
 
@@ -110,12 +114,14 @@ class AllEmployeeSalaryViewSet(viewsets.ModelViewSet):
         serializer = self.get_serializer(data=request.data)
 
         try:
-            if serializer.is_valid():
-                serializer.save(salary=employee)
-                return Response(serializer.data)
+            serializer.is_valid(raise_exception=True)
+            serializer.save(salary=employee)
             return Response(serializer.data)
         except:
-            return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
+            raise exception_handler.ActionDecor(
+                detail="Server is down, can't record overtime.",
+                code="overtime_error"
+                )
 
     @action(detail=True, methods=['GET', 'POST'], url_path='leave')
     def leave(self, request, pk=None):
@@ -129,7 +135,10 @@ class AllEmployeeSalaryViewSet(viewsets.ModelViewSet):
                 return Response(serializer.data)
             return Response(serializer.data)
         except:
-            return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
+            raise exception_handler.ActionDecor(
+                detail="Server is down, can't record leave.",
+                code="leave_error"
+                )
 
 
 class EmployeeSalaryViewSet(generics.RetrieveAPIView):
@@ -138,5 +147,4 @@ class EmployeeSalaryViewSet(generics.RetrieveAPIView):
     permission_classes = (permissions.IsAuthenticated,)
 
     def get_object(self):
-        user = self.request.user
-        return get_object_or_404(Employees, user=user)
+        return get_object_or_404(Employees, user=self.request.user)

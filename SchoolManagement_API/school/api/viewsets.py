@@ -1,14 +1,18 @@
-from msilib.schema import Error
 from rest_framework import (
     viewsets, status, permissions, authentication, generics, filters
     )
+from rest_framework.exceptions import APIException
 from .. import models
 from . import serializers, permissions as perm
 from rest_framework.decorators import action
 from rest_framework.response import Response
 from django.shortcuts import get_object_or_404
 from . import pagination as pag
+from utils import school_exception_handler as exception_handler
+import logging, traceback
 
+
+logger = logging.getLogger(__name__)
 
 class BaseAttrViewSet(viewsets.ModelViewSet):
 
@@ -54,7 +58,7 @@ class BaseAttrViewSet(viewsets.ModelViewSet):
 
             serializer.is_valid(raise_exception=True)
             serializer.save(**obj_map)
-            return Response(serializer.data)
+            return Response(serializer.data, status=status.HTTP_201_CREATED)
 
         if request.method == 'DELETE':
             query.delete()
@@ -97,9 +101,19 @@ class SchoolViewSet(BaseAttrViewSet):
         # Post and Delete Method
             self.actionhelper(request, query, obj_map)
 
+            if not len(query):
+                return Response({'No Policies on this school'})
+
             return Response(serializer.data)
-        except:
-            return Response(status=status.HTTP_400_BAD_REQUEST)
+
+        except Exception as e:
+            logger.error('bad madafaka')
+            print(str(e),traceback.format_exc())
+            raise exception_handler.ObjectNotAvail(
+                detail='Error on server, please comeback later',
+                code='policies_error',
+
+                )
 
     @action(detail=True, methods=action_method, url_path='departments')
     def departments(self, request, pk=None):
@@ -121,9 +135,16 @@ class SchoolViewSet(BaseAttrViewSet):
         # Post and Delete Method
 
             self.actionhelper(request, query, obj_map)
+
+            if not len(query):
+                return Response({'No Departments on this school'})
+
             return Response(serializer.data)
         except:
-            return Response(status=status.HTTP_400_BAD_REQUEST)
+            raise exception_handler.ObjectNotAvail(
+                detail='Error on server, please comeback later',
+                code='department_error'
+                )
 
     @action(detail=True, methods=action_method, url_path='courses')
     def courses(self, request, pk=None):
@@ -147,9 +168,15 @@ class SchoolViewSet(BaseAttrViewSet):
         # Post and Delete Method
             self.actionhelper(request, query, obj_map)
 
+            if not len(query):
+                return Response({'No Courses on this school'})
+
             return Response(serializer.data)
         except:
-            return Response(status=status.HTTP_400_BAD_REQUEST)
+            exception_handler.ObjectNotAvail(
+                detail='Error on server, please comeback later',
+                code='Course Error'
+                )
 
 
 class EmployeeViewSet(BaseAttrViewSet):
@@ -182,10 +209,17 @@ class EmployeeViewSet(BaseAttrViewSet):
         try:
             query = models.TeacherSubject.objects.filter(teacher=teacher)
             serializer = self.get_serializer(query, many=True)
+
+            if not len(query):
+                return Response({'No Subjects yet'})
+
             self.actionhelper(request, query, obj_map)
             return Response(serializer.data)
         except:
-            return Response(status=status.HTTP_400_BAD_REQUEST)
+            raise exception_handler.ObjectNotAvail(
+                detail='Error on server, please comeback later',
+                code='adding_subject_error'
+                )
 
 
 class OwnProfileViewSet(generics.RetrieveUpdateDestroyAPIView):
