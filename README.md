@@ -1,5 +1,8 @@
 # School-Management-API
 
+<img src="https://user-images.githubusercontent.com/70097729/117541209-604fb300-b045-11eb-90b2-aecac2b82893.png" alt="Girl in a jacket" >
+
+
 This project is open source - the sole purpose of this project is to showcase my skills on REST API for future clients. Also, the project is front end ready. Accessing the project is simple, just follow the instructions below:
 
 1. Clone the project, please refer to this link for instructions https://git-scm.com/book/en/v2/Git-Basics-Getting-a-Git-Repository               
