@@ -1,7 +1,7 @@
 # School-Management-API
 
 ## Flow chart
-<img src="https://user-images.githubusercontent.com/70097729/117541209-604fb300-b045-11eb-90b2-aecac2b82893.png" alt="Girl in a jacket" >
+<img src="https://user-images.githubusercontent.com/70097729/117541209-604fb300-b045-11eb-90b2-aecac2b82893.png" alt="" >
 
 
 This project is open source - the sole purpose of this project is to showcase my skills on REST API for future clients. Also, the Project is tested and exceptions are handled using custom or built in Django Exceptions.Note: Loggings are already set up, after cloning this project. Create a "logs" directory inside the Project DIR
@@ -15,16 +15,23 @@ This project is open source - the sole purpose of this project is to showcase my
 ## School-Management-API Apps
 
 ### School Features
-- Edit or add a new employee for the school (Admin Access only)
-- Edit or add policies for the school (Admin Access only)
-- Add new or edit existing departments of the school (Admin Access only)
--  Add new or edit existing courses of the school (Admin Access only)
--  Add new or edit existing section of the school (Admin Access only)
--  Add new or edit existing subjectsof the school (Admin Access only)
+
+<img src="https://user-images.githubusercontent.com/70097729/117542340-ca1e8b80-b04a-11eb-8ef5-cda0b049b32c.png" alt="" >
+
+- Create employees for the school (Admin Access)
+- Edit or add policies (Admin Access)
+- Add or edit existing departments (Admin Access)
+- Create or edit existing courses (Admin Access)
+- Add or edit existing section (Admin Access)
+- Create or edit existing subjects (Admin Access)
 
 ### Students Features
-- List, retrieve, put, or delete new students (Admin Access)
+
+<img src="https://user-images.githubusercontent.com/70097729/117542446-474a0080-b04b-11eb-80d8-b21dc0371349.png" alt="" >
+
+- List, retrieve, put, post, or delete new students (Admin Access)
 - Assign new subjects to students (Admin Access)
+
 - If user is teacher:
    - Edit or add grades to students
    - Assign new assignments/projects for a particular handled subject
@@ -37,6 +44,9 @@ This project is open source - the sole purpose of this project is to showcase my
    - Edit profile info
 
 ### Finance Features
+
+<img src="https://user-images.githubusercontent.com/70097729/117542478-60eb4800-b04b-11eb-9707-b854c3bb019d.png" alt="" >
+
 - If student:
    - Add payment (Deduct current balance) (HR Access)
    - View student tuition balance
@@ -49,6 +59,8 @@ This project is open source - the sole purpose of this project is to showcase my
 
 ## Populator Feature
 ### Populate the DB first with fake data
+
+<img src="https://user-images.githubusercontent.com/70097729/117542756-6eed9880-b04c-11eb-9c39-c4eaf100ad58.png" alt="" >
 
 Command:
    - python manage.py [avail custom command] [int(argument)] 
