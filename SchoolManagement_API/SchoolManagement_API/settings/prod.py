@@ -13,7 +13,7 @@ SESSION_COOKIE_SECURE = True
 DATABASES = {
     'default': {
         'ENGINE': 'django.db.backends.postgresql_psycopg2',
-        'NAME': 'SchoolManagement_API',
+        'NAME': 'schoolmanagement_api',
         'USER': 'eunice251',
         'PASSWORD': 'Signup!23',
         'HOST': 'localhost',
