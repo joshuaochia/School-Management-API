@@ -126,7 +126,7 @@ USE_TZ = True
 # STATIC CONFIG
 STATIC_URL = '/static/'
 STATICFILES_DIRS = [STATIC,]
-STATIC_ROOT = os.path.join(BASE_DIR, 'var/static')
+STATIC_ROOT = os.path.join(BASE_DIR, 'static')
     
 # User Config
 AUTH_USER_MODEL = 'core.User'
