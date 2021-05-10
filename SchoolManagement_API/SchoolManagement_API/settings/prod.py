@@ -4,7 +4,7 @@ from .base import *
 
 DEBUG = False
 
-ALLOWED_HOSTS = ['159.65.255.60']
+ALLOWED_HOSTS = ['159.65.255.60', 'localhost']
 
 CSRF_COOKIE_SECURE = True
 SESSION_COOKIE_SECURE = True
